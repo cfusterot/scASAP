@@ -5,15 +5,16 @@ report: "report/workflow.rst"
 
 include: "rules/common.smk"
 
+OUTDIR = config["outdir"]
 
 rule all:
     input:
         # The first rule should define the default target files
         # Subsequent target rules can be specified below. They should start with all_*.
-        expand(["results/cellranger_count/{sample}/outs/raw_feature_bc_matrix.h5",
-                "results/cellranger_count/{sample}/outs/filtered_feature_bc_matrix.h5",
-                "results/cellranger_count/{sample}/outs/possorted_genome_bam.bam"],
-               sample=samples['sample'])
+        expand(["{OUTDIR}/{sample}/cellranger_count/raw_feature_bc_matrix.h5",
+                "{OUTDIR}/{sample}/cellranger_count/filtered_feature_bc_matrix.h5",
+                "{OUTDIR}/{sample}/cellranger_count/possorted_genome_bam.bam"],
+               sample=samples['sample'], OUTDIR=OUTDIR)
 
 
 include: "rules/cellranger.smk"
