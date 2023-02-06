@@ -70,9 +70,9 @@ rule cellranger_count:
     input:
         fastqs=lambda wildcards: samples["fastqs"][wildcards.sample]
     output:
-        raw="results/cellranger_count/{sample}/outs/raw_feature_bc_matrix.h5",
-        filtered="results/cellranger_count/{sample}/outs/filtered_feature_bc_matrix.h5",
-        bam="results/cellranger_count/{sample}/outs/possorted_genome_bam.bam"
+        raw="{OUTDIR}/{sample}/cellranger_count/raw_feature_bc_matrix.h5",
+        filtered="{OUTDIR}/{sample}/cellranger_count/filtered_feature_bc_matrix.h5",
+        bam="{OUTDIR}/{sample}/cellranger_count/possorted_genome_bam.bam"
     params:
         transcriptome=config['cellranger']['transcriptome'],
         expect_cells=lambda wildcards, input: samples['expect_cells'][wildcards.sample],
@@ -85,13 +85,13 @@ rule cellranger_count:
     resources:
         mem_free_gb=config['cellranger']['memory_per_cpu']
     log:
-        err="results/logs/cellranger_count/{sample}.err",
-        out="results/logs/cellranger_count/{sample}.out",
-        time="results/logs/time/cellranger_count/{sample}"
+        err="{OUTDIR}/logs/cellranger_count/{sample}.err",
+        out="{OUTDIR}/logs/cellranger_count/{sample}.out",
+        time="{OUTDIR}/logs/time/cellranger_count/{sample}"
     shell:
         """
         {DATETIME} > {log.time} &&
-        rm -rf results/cellranger_count/{wildcards.sample} &&
+        rm -rf "{OUTDIR}/{wildcards.sample}/cellranger_count/" &&
         cellranger count --id={wildcards.sample} \
         --transcriptome={params.transcriptome} \
         --fastqs={input.fastqs} \
@@ -99,6 +99,6 @@ rule cellranger_count:
         --expect-cells={params.expect_cells} \
         {params.runtime_options} \
         2> {log.err} > {log.out} &&
-        mv {wildcards.sample} results/cellranger_count/{wildcards.sample} &&
+        mv {wildcards.sample} "{OUTDIR}/{wildcards.sample}/cellranger_count/" &&
         {DATETIME} >> {log.time}
         """
