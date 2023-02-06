@@ -1,0 +1,30 @@
+# The main entry point of your workflow.
+# After configuring, running snakemake -n in a clone of this repository should successfully execute a dry-run of the workflow.
+
+report: "report/workflow.rst"
+
+include: "rules/common.smk"
+
+
+rule all:
+    input:
+        # The first rule should define the default target files
+        # Subsequent target rules can be specified below. They should start with all_*.
+        expand(["results/cellranger_count/{sample}/outs/raw_feature_bc_matrix.h5",
+                "results/cellranger_count/{sample}/outs/filtered_feature_bc_matrix.h5",
+                "results/cellranger_count/{sample}/outs/possorted_genome_bam.bam"],
+               sample=samples['sample'])
+
+
+include: "rules/cellranger.smk"
+include: "rules/other.smk"
+
+# Conditionally add rules to the directive 'localrules'
+_localrules = list(workflow._localrules) # get the local rules so far
+
+# cellranger jobmode 'sge' should be run on the head node, as it submits job itself
+cellranger_local_jobmodes = ['sge']
+if config['cellranger']['jobmode'] in cellranger_local_jobmodes:
+    _localrules.append('cellranger_count')
+
+workflow._localrules = set(_localrules) # set the updated local rules

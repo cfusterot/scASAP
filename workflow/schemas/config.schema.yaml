@@ -1,0 +1,32 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+
+description: snakemake configuration file
+
+type: object
+
+# possible entries of the config file and which type they should be
+properties:
+  samples:
+    type: string
+
+  cellranger:
+    type: object
+    properties:
+      transcriptome:
+        type: string
+      jobmode:
+        type: string
+      threads:
+        type: integer
+      memory_per_cpu:
+        type: integer
+    required:
+      - transcriptome
+      - jobmode
+      - threads
+      - memory_per_cpu
+
+# entries that have to be in the config file for successful validation
+required:
+  - samples
+  - cellranger
