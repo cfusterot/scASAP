@@ -23,7 +23,7 @@ properties:
       memory_per_cpu:
         type: integer
     required:
-      - transcriptome
+      - reference
       - jobmode
       - threads
       - memory_per_cpu

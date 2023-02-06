@@ -74,13 +74,13 @@ rule cellranger_count:
         filtered="{OUTDIR}/{sample}/cellranger_count/filtered_feature_bc_matrix.h5",
         bam="{OUTDIR}/{sample}/cellranger_count/possorted_genome_bam.bam"
     params:
-        transcriptome=config['cellranger']['transcriptome'],
-        expect_cells=lambda wildcards, input: samples['expect_cells'][wildcards.sample],
+        reference=config['cellranger']['reference'],
+        #expect_cells=lambda wildcards, input: samples['expect_cells'][wildcards.sample],
         runtime_options=get_runtime_options(),
         sample_option=get_sample_option,
         threads=config['cellranger']['threads']
     envmodules:
-        "bio/cellranger/3.1.0"
+        "/fast/groups/ag_ludwig/Modules/modulefiles/cellranger-atac/2.1.0"
     threads: get_rule_threads()
     resources:
         mem_free_gb=config['cellranger']['memory_per_cpu']
@@ -92,11 +92,10 @@ rule cellranger_count:
         """
         {DATETIME} > {log.time} &&
         rm -rf "{OUTDIR}/{wildcards.sample}/cellranger_count/" &&
-        cellranger count --id={wildcards.sample} \
-        --transcriptome={params.transcriptome} \
+        cellranger-atac count --id={wildcards.sample} \
+        --reference={params.reference} \
         --fastqs={input.fastqs} \
         {params.sample_option} \
-        --expect-cells={params.expect_cells} \
         {params.runtime_options} \
         2> {log.err} > {log.out} &&
         mv {wildcards.sample} "{OUTDIR}/{wildcards.sample}/cellranger_count/" &&
