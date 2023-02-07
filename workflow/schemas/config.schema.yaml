@@ -11,10 +11,18 @@ properties:
   outdir:
     type: string
 
+  envmodules:
+    type: object
+    properties:
+      cellranger:
+        type: string
+    required:
+      - cellranger
+
   cellranger:
     type: object
     properties:
-      transcriptome:
+      reference:
         type: string
       jobmode:
         type: string
@@ -24,12 +32,10 @@ properties:
         type: integer
     required:
       - reference
-      - jobmode
-      - threads
-      - memory_per_cpu
 
 # entries that have to be in the config file for successful validation
 required:
+  - envmodules
   - samples
   - outdir
   - cellranger

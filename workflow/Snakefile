@@ -7,13 +7,19 @@ include: "rules/common.smk"
 
 OUTDIR = config["outdir"]
 
+def get_resource(rule,resource):
+    try:
+        return config["resources"][rule][resource]
+    except KeyError:
+        return config["resources"]["default"][resource]
+
 rule all:
     input:
         # The first rule should define the default target files
         # Subsequent target rules can be specified below. They should start with all_*.
-        expand(["{OUTDIR}/{sample}/cellranger_count/raw_feature_bc_matrix.h5",
-                "{OUTDIR}/{sample}/cellranger_count/filtered_feature_bc_matrix.h5",
-                "{OUTDIR}/{sample}/cellranger_count/possorted_genome_bam.bam"],
+        expand(["{OUTDIR}/cellranger_count/{sample}/raw_feature_bc_matrix.h5",
+                "{OUTDIR}/cellranger_count/{sample}/filtered_feature_bc_matrix.h5",
+                "{OUTDIR}/cellranger_count/{sample}/possorted_genome_bam.bam"],
                sample=samples['sample'], OUTDIR=OUTDIR)
 
 
@@ -21,11 +27,11 @@ include: "rules/cellranger.smk"
 include: "rules/other.smk"
 
 # Conditionally add rules to the directive 'localrules'
-_localrules = list(workflow._localrules) # get the local rules so far
+#_localrules = list(workflow._localrules) # get the local rules so far
 
 # cellranger jobmode 'sge' should be run on the head node, as it submits job itself
-cellranger_local_jobmodes = ['sge']
-if config['cellranger']['jobmode'] in cellranger_local_jobmodes:
-    _localrules.append('cellranger_count')
+#cellranger_local_jobmodes = ['sge']
+#if config['cellranger']['jobmode'] in cellranger_local_jobmodes:
+#    _localrules.append('cellranger_count')
 
-workflow._localrules = set(_localrules) # set the updated local rules
+#workflow._localrules = set(_localrules) # set the updated local rules

@@ -4,11 +4,23 @@
 samples: "config/samples.tsv"
 outdir: "/data/gpfs-1/users/cofu10_c/scratch"
 
+# Configure the correspondent environmental modules for version control
+envmodules:
+    cellranger: "/fast/groups/ag_ludwig/Modules/modulefiles/cellranger-atac/2.1.0"
 cellranger:
-    # Path of folder containing 10x-compatible reference (--transcriptome)
+    # Path of folder containing 10x-compatible reference (--reference)
     reference: "/data/gpfs-1/groups/ag_ludwig/work/genome_ref/refdata-cellranger-arc-GRCh38-2020-mtMask"
     # Job manager to use.
-    jobmode: local #sge
+    #jobmode: default #slurm, local, sge
     # misc
-    threads: 64
-    memory_per_cpu: 4
+    #threads: 4
+    #memory_per_cpu: 64
+
+resources:
+    default:
+        threads: 1
+        mem_mb: 8000
+        walltime: 480
+    cellranger:
+        threads: 1
+        mem_mb: 64000
