@@ -2,7 +2,7 @@
 # In case of sample based data, it should be complemented by a samples.tsv file that contains
 # one row per sample. It can be parsed easily via pandas.
 samples: "config/samples.tsv"
-outdir: "/data/gpfs-1/users/cofu10_c/scratch"
+outdir: "/data/gpfs-1/users/cofu10_c/scratch/test_multipipe"
 
 # Configure the correspondent environmental modules for version control
 envmodules:

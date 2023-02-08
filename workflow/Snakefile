@@ -6,13 +6,19 @@ report: "report/workflow.rst"
 include: "rules/common.smk"
 
 OUTDIR = config["outdir"]
-FASTQDIR = samples["fastqs"] + '/'
+FASTQDIR = samples["fastqs"]
+PREFIX = samples["prefix"]
 
 def get_resource(rule,resource):
     try:
         return config["resources"][rule][resource]
     except KeyError:
         return config["resources"]["default"][resource]
+
+def qc_input(wc): 
+    path = f"/{FASTQDIR}/{{sample}}/{PREFIX}_S1_L001_R2_001.fastq.gz"
+    return path
+
 
 # Obtain fastq files for fastqc analysis
 def get_r1(wildcards):
@@ -28,9 +34,8 @@ rule all:
         expand(["{OUTDIR}/cellranger_count/{sample}/raw_feature_bc_matrix.h5",
                 "{OUTDIR}/cellranger_count/{sample}/filtered_feature_bc_matrix.h5",
                 "{OUTDIR}/cellranger_count/{sample}/possorted_genome_bam.bam",
-                "{OUTDIR}/qc/{sample}/{sample}.html",
-                "{OUTDIR}/qc/{sample}/{sample}_fastqc.zip"],
-               sample=samples['sample'], OUTDIR=OUTDIR)
+                "{OUTDIR}/qc/{sample}/{prefix}.html",
+                "{OUTDIR}/qc/{sample}/{prefix}_fastqc.zip"], sample=samples['sample'], OUTDIR=OUTDIR, prefix=PREFIX)
 
 
 include: "rules/cellranger.smk"
