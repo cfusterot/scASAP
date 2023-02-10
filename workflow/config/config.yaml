@@ -4,23 +4,33 @@
 samples: "config/samples.tsv"
 outdir: "/data/gpfs-1/users/cofu10_c/scratch/test_multipipe"
 
-# Configure the correspondent environmental modules for version control
+# Configure the correspondent environmental modules and program paths for version control
 envmodules:
     cellranger: "/fast/groups/ag_ludwig/Modules/modulefiles/cellranger-atac/2.1.0"
+programpaths:
+    amulet: "/fast/groups/ag_ludwig/work/software/AMULET/AMULET.sh"
+
+# Analysis parameters
 cellranger:
     # Path of folder containing 10x-compatible reference (--reference)
     reference: "/data/gpfs-1/groups/ag_ludwig/work/genome_ref/refdata-cellranger-arc-GRCh38-2020-mtMask"
-    # Job manager to use.
-    #jobmode: default #slurm, local, sge
-    # misc
-    #threads: 4
-    #memory_per_cpu: 64
+    lanes: ["1", "2"]
+amulet:
+    autosomes: "/data/gpfs-1/groups/ag_ludwig/work/software/AMULET/human_autosomes.txt"
+    blacklist: "data/gpfs-1/groups/ag_ludwig/work/genome_ref/ENCODE_blacklist/GRCh38_unified_blacklist.bed"
 
+mgatk:
+   enable: TRUE 
+
+# Cluster resources configuration
 resources:
     default:
         threads: 1
         mem_mb: 8000
         walltime: 480
+    fastqc:
+      threads: 4
+      mem_mb: 32000
     cellranger:
         threads: 1
         mem_mb: 64000

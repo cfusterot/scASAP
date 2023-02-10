@@ -1,28 +1,10 @@
 import glob
 
-
-def get_sample_option(wildcards):
-    '''
-    Get cellranger sample option.
-    '''
-    
-    option_str = ""
-    
-    sample_prefix = samples['prefix'][wildcards.sample]
-
-    if sample_prefix != ".":
-        option_str += f"--sample={sample_prefix}"
-        
-    return option_str
-
-
-rule cellranger_count:
+rule amulet:
     input:
-        fastqs=lambda wildcards: samples["fastqs"][wildcards.sample]
+        
     output:
-        raw="{OUTDIR}/cellranger_count/{sample}/raw_feature_bc_matrix.h5",
-        filtered="{OUTDIR}/cellranger_count/{sample}/filtered_feature_bc_matrix.h5",
-        bam="{OUTDIR}/cellranger_count/{sample}/possorted_genome_bam.bam"
+        multiplets="{OUTDIR}/amulet/{sample}/MultipletSummary.txt"
     params:
         reference=config['cellranger']['reference'],
         sample_option=get_sample_option
@@ -43,6 +25,7 @@ rule cellranger_count:
         --reference={params.reference} \
         --fastqs={input.fastqs} \
         {params.sample_option} \
+        --localcores=12 --localmem=40 \
         2> {log.err} > {log.out} &&
         mv {wildcards.sample} "{OUTDIR}/cellranger_count/" &&
         {DATETIME} >> {log.time}

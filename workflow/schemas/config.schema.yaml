@@ -19,6 +19,17 @@ properties:
     required:
       - cellranger
 
+  amulet:
+    type: object
+    properties:
+      autosomes: 
+        type: string
+      blacklist: 
+        type: string
+    required:
+      - autosomes
+      - blacklist
+  
   cellranger:
     type: object
     properties:
@@ -32,6 +43,14 @@ properties:
         type: integer
     required:
       - reference
+    
+  mgatk:
+    type: object
+    properties:
+      enable:
+        type: boolean
+    required:
+      - enable
 
 # entries that have to be in the config file for successful validation
 required:
@@ -39,3 +58,5 @@ required:
   - samples
   - outdir
   - cellranger
+  - amulet
+  - mgatk

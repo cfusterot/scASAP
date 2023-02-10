@@ -8,6 +8,8 @@ include: "rules/common.smk"
 OUTDIR = config["outdir"]
 FASTQDIR = samples["fastqs"]
 PREFIX = samples["prefix"]
+read=['1', '2', '3']
+lane=config["cellranger"]["lanes"]
 
 def get_resource(rule,resource):
     try:
@@ -15,17 +17,15 @@ def get_resource(rule,resource):
     except KeyError:
         return config["resources"]["default"][resource]
 
-def qc_input(wc): 
-    path = f"/{FASTQDIR}/{{sample}}/{PREFIX}_S1_L001_R2_001.fastq.gz"
-    return path
-
-
-# Obtain fastq files for fastqc analysis
-def get_r1(wildcards):
-    return glob.glob(FASTQDIR + wildcards.sample + '_R1.fastq.gz')
-
-def get_r2(wildcards):
-    return glob.glob(FASTQDIR + wildcards.sample + '_R2.fastq.gz') 
+def get_fastq(dir, folder):
+    """Returns a string that uses Snakemake's {} mini language"""
+    result = []
+    path = os.path.join(dir,folder)
+    for p in os.listdir(path):
+    # check if current path is a file
+        if os.p.isfile(os.p.join(path, p)):
+            result.append(p)
+    return result
 
 rule all:
     input:
@@ -34,10 +34,13 @@ rule all:
         expand(["{OUTDIR}/cellranger_count/{sample}/raw_feature_bc_matrix.h5",
                 "{OUTDIR}/cellranger_count/{sample}/filtered_feature_bc_matrix.h5",
                 "{OUTDIR}/cellranger_count/{sample}/possorted_genome_bam.bam",
-                "{OUTDIR}/qc/{sample}/{prefix}.html",
-                "{OUTDIR}/qc/{sample}/{prefix}_fastqc.zip"], sample=samples['sample'], OUTDIR=OUTDIR, prefix=PREFIX)
+                "{OUTDIR}/qc/{sample}/{prefix}_S1_L00{lane}_R{read}_001.html",
+                "{OUTDIR}/qc/{sample}/{prefix}_S1_L00{lane}_R{read}_001_fastqc.zip",
+                "{OUTDIR}/mgatk/{sample}/chrM_refAllele.txt"],
+                sample=samples['sample'], OUTDIR=OUTDIR, prefix=PREFIX, read=read, lane=lane)
 
 
 include: "rules/cellranger.smk"
 include: "rules/qc.smk"
+include: "rules/mgatk.smk"
 include: "rules/other.smk"
