@@ -33,4 +33,4 @@ resources:
       mem_mb: 32000
     cellranger:
         threads: 1
-        mem_mb: 64000
+        mem_mb: 98000

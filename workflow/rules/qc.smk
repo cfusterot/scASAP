@@ -13,7 +13,7 @@ rule fastqc:
         expand(["{{OUTDIR}}/qc/{sample}/{prefix}_S1_L00{lane}_R{read}_001.html",
         "{{OUTDIR}}/qc/{sample}/{prefix}_S1_L00{lane}_R{read}_001_fastqc.zip"], lane=lane, prefix=PREFIX, sample=SAMPLES, read=read)
 # the suffix _fastqc.zip is necessary for multiqc to find the file. If not using multiqc, you are free to choose an arbitrary filename
-    params: "--quiet --outdir {OUTDIR}/qc/"
+    params: expand("--quiet --outdir '{{OUTDIR}}/qc/{sample}'", sample=SAMPLES) 
     resources:
         mem_mb=get_resource("fastqc", "mem_mb"),
         walltime=get_resource("fastqc", "walltime")
