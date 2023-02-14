@@ -7,11 +7,11 @@ properties:
   sample:
     type: string
     description: sample name/identifier
-  expect_cells:
-    type: integer
-    description: number of cells expected (set to 0 to disable)
+  condition:
+    type: string
+    description: sample condition (i.e. WT, treated)
 
 # columns that the config/samples.tsv file must have to pass schema validation
 required:
   - sample
-  - expect_cells
+  - condition

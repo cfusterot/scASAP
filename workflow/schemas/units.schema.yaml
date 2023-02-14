@@ -1,0 +1,29 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+
+description: an entry in the units sheet
+
+# columns that the config/samples.tsv file can have and which type they should be
+properties:
+  sample:
+    type: string
+    description: sample name/identifier
+  unit:
+    type: string
+    description: lane number per sample
+  fq1:
+    type: string
+    description: complete name of the R1 file
+  fq2:
+    type: string
+    description: complete name of the R2 file
+  fq3:
+    type: string
+    description: complete name of the R3 file
+
+# columns that the config/samples.tsv file must have to pass schema validation
+required:
+  - sample
+  - unit 
+  - fq1
+  - fq2
+  - fq3

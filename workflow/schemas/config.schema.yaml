@@ -8,7 +8,11 @@ type: object
 properties:
   samples:
     type: string
-  outdir:
+  units:
+    type: string
+  out:
+    type: string
+  log:
     type: string
 
   envmodules:
@@ -33,15 +37,12 @@ properties:
   cellranger:
     type: object
     properties:
+      path_to_outs:
+        type: string
       reference:
         type: string
-      jobmode:
-        type: string
-      threads:
-        type: integer
-      memory_per_cpu:
-        type: integer
     required:
+      - path_to_outs
       - reference
     
   mgatk:
@@ -56,7 +57,9 @@ properties:
 required:
   - envmodules
   - samples
-  - outdir
+  - units
+  - out
+  - log
   - cellranger
   - amulet
   - mgatk

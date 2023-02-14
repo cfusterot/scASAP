@@ -1,2 +1,2 @@
-sample	expect_cells	prefix	fastqs
-P1542_CHIP_multiome	10000	CHIP_multiome_ATAC	/data/gpfs-1/groups/ag_ludwig/work/P1542_20220610/P1542_ATAC_multiome_demux/H7YHLDRX2
+sample	condition
+P1542_CHIP_multiome	WT

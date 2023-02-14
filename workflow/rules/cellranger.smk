@@ -18,7 +18,7 @@ def get_sample_option(wildcards):
 
 rule cellranger_count:
     input:
-        fastqs=lambda wildcards: samples["fastqs"][wildcards.sample]
+        fastqs=lambda wildcards: config["cellranger"]["path_to_outs"][wildcards.sample]
     output:
         raw="{OUTDIR}/cellranger_count/{sample}/raw_feature_bc_matrix.h5",
         filtered="{OUTDIR}/cellranger_count/{sample}/filtered_feature_bc_matrix.h5",

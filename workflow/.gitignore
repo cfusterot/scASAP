@@ -1,0 +1,6 @@
+.snakemake
+out
+log
+slurm-*.out
+Rplots.pdf
+report.html

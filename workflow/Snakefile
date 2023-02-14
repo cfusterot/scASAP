@@ -1,16 +1,30 @@
 # The main entry point of your workflow.
 # After configuring, running snakemake -n in a clone of this repository should successfully execute a dry-run of the workflow.
+import pandas as pd
 
 report: "report/workflow.rst"
-
+# Include rule files
 include: "rules/common.smk"
+# Variable declaration
+OUTDIR = config["out"]
+LOGDIR = config["log"]
 
-OUTDIR = config["outdir"]
-FASTQDIR = samples["fastqs"]
-PREFIX = samples["prefix"]
-read=['1', '2', '3']
-lane=config["cellranger"]["lanes"]
+try:
+    samples = pd.read_csv(config["samples"], sep="\t", comment="#").set_index("sample", drop=False)
+    validate(samples, schema="schemas/samples.schema.yaml")
+except FileNotFoundError:
+    warning(f"ERROR: the samples file ({config['samples']}) does not exist. Please see the README file for details. Quitting now.")
+    sys.exit(1)
 
+try:
+    units = pd.read_csv(config["units"], dtype=str, sep="\t", comment="#").set_index(["sample", "unit"], drop=False)
+    validate(units, schema="schemas/units.schema.yaml")
+    units.index = units.index.set_levels([i.astype(str) for i in units.index.levels])  # enforce str in index
+except FileNotFoundError:
+    warning(f"ERROR: the units file ({config['units']}) does not exist. Please see the README file for details. Quitting now.")
+    sys.exit(1)    
+
+# Auxiliary functions
 def get_resource(rule,resource):
     try:
         return config["resources"][rule][resource]
@@ -26,21 +40,21 @@ def get_fastq(dir, folder):
         if os.p.isfile(os.p.join(path, p)):
             result.append(p)
     return result
-
+# Final output 
 rule all:
     input:
         # The first rule should define the default target files
         # Subsequent target rules can be specified below. They should start with all_*.
-        expand(["{OUTDIR}/cellranger_count/{sample}/raw_feature_bc_matrix.h5",
-                "{OUTDIR}/cellranger_count/{sample}/filtered_feature_bc_matrix.h5",
-                "{OUTDIR}/cellranger_count/{sample}/possorted_genome_bam.bam",
-                "{OUTDIR}/qc/{sample}/{prefix}_S1_L00{lane}_R{read}_001.html",
-                "{OUTDIR}/qc/{sample}/{prefix}_S1_L00{lane}_R{read}_001_fastqc.zip",
-                "{OUTDIR}/mgatk/{sample}/chrM_refAllele.txt"],
-                sample=samples['sample'], OUTDIR=OUTDIR, prefix=PREFIX, read=read, lane=lane)
+        expand([
+#"{OUTDIR}/cellranger_count/{sample}/raw_feature_bc_matrix.h5",
+#                "{OUTDIR}/cellranger_count/{sample}/filtered_feature_bc_matrix.h5",
+#                "{OUTDIR}/cellranger_count/{sample}/possorted_genome_bam.bam",
+                "{OUTDIR}/qc/{sample}/multiqc_report.html"#,
+#               "{OUTDIR}/mgatk/{sample}/chrM_refAllele.txt"
+                ], sample=samples['sample'], OUTDIR=OUTDIR)
 
-
-include: "rules/cellranger.smk"
+# Rule files
+#include: "rules/cellranger.smk"
 include: "rules/qc.smk"
-include: "rules/mgatk.smk"
+#include: "rules/mgatk.smk"
 include: "rules/other.smk"

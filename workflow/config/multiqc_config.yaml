@@ -1,0 +1,12 @@
+title: "Ludwig lab ~ Single-Cell ATAC sequencing QC."
+subtitle: "Summary of sequencing data pre and post-alignment."
+intro_text: ""
+report_comment: ""
+
+report_header_info:
+      - Contact E-mail: 'coral.fustero@bih-charite.de'
+            - Application Type: 'Single Cell ATAC-seq'
+                  - Sequencing Platform: 'Chromium 10x'
+                        - Sequencing Setup: '1x28+1x55'
+
+
