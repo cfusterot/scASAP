@@ -1,24 +1,23 @@
 import glob
+import os
 
-
-def get_sample_option(wildcards):
-    '''
-    Get cellranger sample option.
-    '''
-    
-    option_str = ""
-    
-    sample_prefix = samples['prefix'][wildcards.sample]
-
-    if sample_prefix != ".":
-        option_str += f"--sample={sample_prefix}"
-        
+def get_sample_option(wc):
+    option_str=""
+    prefix=units["sample"][wc.sample] 
+    option_str += f"--sample={prefix}"
     return option_str
 
+def get_fq_path(wc):
+    p=units["fq1"][wc.sample]
+    return p
 
 rule cellranger_count:
     input:
-        fastqs=lambda wildcards: config["cellranger"]["path_to_outs"][wildcards.sample]
+        fq=os.path.dirname(units['fq1'])
+        #fq=os.path.dirname(get_fq_path)
+        #fq= wildcards: os.path.dirname(units["fq1"][wildcards.sample])
+        #fq2=lambda wildcards: units["fq2"][wildcards.sample],
+        #fq3=lambda wildcards: units["fq3"][wildcards.sample]
     output:
         raw="{OUTDIR}/cellranger_count/{sample}/raw_feature_bc_matrix.h5",
         filtered="{OUTDIR}/cellranger_count/{sample}/filtered_feature_bc_matrix.h5",
@@ -41,7 +40,7 @@ rule cellranger_count:
         {DATETIME} > {log.time} &&
         cellranger-atac count --id={wildcards.sample} \
         --reference={params.reference} \
-        --fastqs={input.fastqs} \
+        --fastqs={input.fq} \
         {params.sample_option} \
         2> {log.err} > {log.out} &&
         mv {wildcards.sample} "{OUTDIR}/cellranger_count/" &&

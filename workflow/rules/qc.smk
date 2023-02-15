@@ -1,11 +1,8 @@
 import glob
 import os
 
-FASTQDIR=config["cellranger"]["path_to_outs"]
-SAMPLES=samples["sample"]
-
 def fastqc_input(wc):
-    f=os.path.join(FASTQDIR, units.loc[(wc.sample,wc.unit)]['fq' + wc.read])
+    f=units.loc[(wc.sample,wc.unit)]['fq' + wc.read]
     return f
 
 rule fastqc:
