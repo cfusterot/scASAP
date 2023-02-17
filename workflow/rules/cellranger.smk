@@ -17,9 +17,10 @@ rule cellranger_count:
     input:
         fq=get_fq_path
     output:
-        raw="{OUTDIR}/cellranger_count/{sample}/raw_feature_bc_matrix.h5",
-        filtered="{OUTDIR}/cellranger_count/{sample}/filtered_feature_bc_matrix.h5",
-        bam="{OUTDIR}/cellranger_count/{sample}/possorted_genome_bam.bam"
+        singlecells="{OUTDIR}/cellranger_count/{sample}/outs/singlecell.csv",
+        fragments="{OUTDIR}/cellranger_count/{sample}/outs/fragments.tsv.gz",
+        filtered="{OUTDIR}/cellranger_count/{sample}/outs/filtered_feature_bc_matrix.h5",
+        bam="{OUTDIR}/cellranger_count/{sample}/outs/possorted_genome_bam.bam"
     params:
         reference=config['cellranger']['reference']
     envmodules:

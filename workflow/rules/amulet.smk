@@ -2,31 +2,25 @@ import glob
 
 rule amulet:
     input:
-        
+        fragments="{OUTDIR}/cellranger_count/{sample}/outs/fragments.tsv.gz",
+        singlecells="{OUTDIR}/cellranger_count/{sample}/outs/singlecell.csv"
     output:
         multiplets="{OUTDIR}/amulet/{sample}/MultipletSummary.txt"
     params:
-        reference=config['cellranger']['reference'],
-        sample_option=get_sample_option
-    envmodules:
-        config['envmodules']['cellranger']
-    threads: get_resource("cellranger", "threads")
+        amulet_exec="/resources/AMULET/AMULET.sh",
+        amulet_folder="/resources/AMULET",
+        autosomes=config['amulet']['autosomes'],
+        blacklist=config['amulet']['blacklist']
+    threads: get_resource("amulet", "threads")
     resources:
-        mem_mb=get_resource("cellranger", "mem_mb"),
-        walltime=get_resource("cellranger", "walltime")
+        mem_mb=get_resource("amulet", "mem_mb"),
+        walltime=get_resource("amulet", "walltime")
     log:
-        err="{OUTDIR}/logs/cellranger_count/{sample}.err",
-        out="{OUTDIR}/logs/cellranger_count/{sample}.out",
-        time="{OUTDIR}/logs/time/cellranger_count/{sample}"
+        err="{OUTDIR}/logs/amulet/{sample}.err",
+        out="{OUTDIR}/logs/amulet/{sample}.out",
     shell:
         """
-        {DATETIME} > {log.time} &&
-        cellranger-atac count --id={wildcards.sample} \
-        --reference={params.reference} \
-        --fastqs={input.fastqs} \
-        {params.sample_option} \
-        --localcores=12 --localmem=40 \
-        2> {log.err} > {log.out} &&
-        mv {wildcards.sample} "{OUTDIR}/cellranger_count/" &&
-        {DATETIME} >> {log.time}
+        {params.amulet_exec} {input.fragments} {input.singlecells} \ 
+        {params.autosomes} {params.blacklist} "{OUTDIR}/amulet/{sample}" \
+        {params.amulet_folder}
         """

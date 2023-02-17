@@ -2,7 +2,7 @@ import glob
 
 rule mgatk:
     input:
-        bam="{OUTDIR}/cellranger_count/{sample}/possorted_genome_bam.bam"
+        bam="{OUTDIR}/cellranger_count/{sample}/outs/possorted_genome_bam.bam"
     output:
         ref="{OUTDIR}/mgatk/{sample}/chrM_refAllele.txt"
     conda:
