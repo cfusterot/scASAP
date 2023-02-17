@@ -48,12 +48,12 @@ rule all:
         expand(["{OUTDIR}/cellranger_count/{sample}/raw_feature_bc_matrix.h5",
                 "{OUTDIR}/cellranger_count/{sample}/filtered_feature_bc_matrix.h5",
                 "{OUTDIR}/cellranger_count/{sample}/possorted_genome_bam.bam",
-                "{OUTDIR}/qc/{sample}/multiqc_report.html"#,
-#               "{OUTDIR}/mgatk/{sample}/chrM_refAllele.txt"
+                "{OUTDIR}/qc/{sample}/multiqc_report.html",
+                "{OUTDIR}/mgatk/{sample}/chrM_refAllele.txt"
                 ], sample=samples['sample'], OUTDIR=OUTDIR)
 
 # Rule files
 include: "rules/cellranger.smk"
 include: "rules/qc.smk"
-#include: "rules/mgatk.smk"
+include: "rules/mgatk.smk"
 include: "rules/other.smk"

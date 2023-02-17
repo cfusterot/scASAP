@@ -35,5 +35,6 @@ resources:
       threads: 4
       mem_mb: 32000
     cellranger:
-        threads: 1
-        mem_mb: 98000
+        threads: 8
+        mem_mb: 120000
+        walltime: 1160
