@@ -30,9 +30,9 @@ rule cellranger_count:
         mem_mb=get_resource("cellranger", "mem_mb"),
         walltime=get_resource("cellranger", "walltime")
     log:
-        err="{OUTDIR}/logs/cellranger_count/{sample}.err",
-        out="{OUTDIR}/logs/cellranger_count/{sample}.out",
-        time="{OUTDIR}/logs/time/cellranger_count/{sample}"
+        err="{}/{sample}/cellranger.err".format(LOGDIR),
+        out="{}/{sample}/cellranger.out".format(LOGDIR),
+        time="{}/{sample}/cellranger.time".format(LOGDIR)"
     shell:
         """
         {DATETIME} > {log.time} &&

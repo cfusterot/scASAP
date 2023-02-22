@@ -19,9 +19,9 @@ rule fastqc:
         mem_mb=get_resource("fastqc", "mem_mb"),
         walltime=get_resource("fastqc", "walltime")
     log:
-        "{}/fastqc/{{sample}}.{{unit}}.r{{read}}.log".format(LOGDIR)
+        "{}/{{sample}}/fastqc_{{unit}}.r{{read}}.log".format(LOGDIR)
     benchmark:
-        "{}/fastqc/{{sample}}.{{unit}}.r{{read}}.bmk".format(LOGDIR)
+        "{}/{{sample}}/fastqc_{{unit}}.r{{read}}.bmk".format(LOGDIR)
     threads: 
         threads=get_resource("fastqc", "threads")
     wrapper:
@@ -39,9 +39,9 @@ rule multiqc:
     params: 
         config["multiqc"]
     benchmark:
-        "{}/multiqc/{{sample}}/multiqc.bmk".format(LOGDIR)
+        "{}/{{sample}}/multiqc.bmk".format(LOGDIR)
     log:
-        "{}/multiqc/{{sample}}/multiqc.log".format(LOGDIR)
+        "{}/{{sample}}/multiqc.log".format(LOGDIR)
     threads: get_resource("multiqc", "threads")
     resources:
         mem_mb=get_resource("multiqc","mem_mb"),
