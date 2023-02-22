@@ -13,6 +13,9 @@ programpaths:
     amulet: "/fast/groups/ag_ludwig/work/software/AMULET/AMULET.sh"
 
 # Analysis parameters
+fastq_screen:
+      enabled: False
+      index_dir: "/data/gpfs-1/users/cofu10_c/scratch/P1813/fastq_indexes"
 multiqc: "--config config/multiqc_config.yaml"
 cellranger:
     path_to_outs: "/data/gpfs-1/groups/ag_ludwig/work/P1813_20230130/demuxed/HLTFNDSX5/mt_GoTChA_ATAC_E5_191"  
@@ -34,6 +37,8 @@ resources:
     fastqc:
       threads: 4
       mem_mb: 32000
+    fastq_screen:
+      threads: 8
     cellranger:
         threads: 4
         mem_mb: 120000
