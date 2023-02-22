@@ -1,64 +1,89 @@
-# Snakemake workflow: Quantitation of 10X Genomics data using Cell Ranger
+# Multipipe: a Snakemake workflow for 10X Genomics' single-cell ATAC sequencing data analysis
 
 [![Snakemake](https://img.shields.io/badge/snakemake-≥5.7.0-brightgreen.svg)](https://snakemake.bitbucket.io)
-[![Build Status](https://travis-ci.org/snakemake-workflows/snakemake_cellranger_count.svg?branch=master)](https://travis-ci.org/snakemake-workflows/snakemake_cellranger_count)
+[Pipeline status](https://github.com/cfusterot/multipipe/commits/master)
 
-This pipeline executes `cellranger count` on FASTQ files produced using 10X Genomics kits.
-The pipeline requires either a reference package obtained from the [10X Genomics website](https://support.10xgenomics.com/single-cell-vdj/software/downloads/3.1/) or a [custom reference](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/advanced/references) computed using an upstream pipeline (e.g. [kevinrue/snakemake_cellranger_mkref](https://github.com/kevinrue/snakemake_cellranger_mkref)).
+multipipe is a Snakemake pipeline that performs a comprehensive single-cell ATAC-seq data analysis, covering from the basic steps (QC, alignment, quantification) to more advanced downstream analyses.
+
+multipipe makes extensive use of Snakemake's integration with the conda package manager, to automatically take care of software requirements and dependencies. Furthermore, it executes `cellranger count` on FASTQ files produced using 10X Genomics kits. The pipeline's flexibility allows users to adjust it to the distinct experimental characteristics. 
 
 ## Authors
 
-* Kevin Rue-Albrecht (@kevinrue)
+* Coral Fustero-Torre
 
-## Usage
+## Setup
 
-If you use this workflow in a paper, don't forget to give credits to the authors by citing the URL of this (original) repository and, if available, its DOI (see above).
+For setting up the pipeline, three configuration files need to be modified. A general description of these files follows. See the *Usage* section for more details.
 
-### Step 1: Obtain a copy of this workflow
+### Configuration files
 
-1. Create a new github repository using this workflow [as a template](https://help.github.com/en/articles/creating-a-repository-from-a-template).
-2. [Clone](https://help.github.com/en/articles/cloning-a-repository) the newly created repository to your local system, into the place where you want to perform the data analysis.
+* **config.yaml** contains all pipeline parameters.
+* **units.tsv** contains information on the samples to be analysed and their paths.
+* **samples.tsv**: contains information about the experimental conditions.
 
-### Step 2: Configure workflow
+### Input files
 
-Configure the workflow according to your needs via editing the files in the `config/` folder. Adjust `config.yaml` to configure the workflow execution, and `samples.tsv` to specify your sample setup.
+* raw data in gzip compressed FASTQ files
 
-### Step 3: Install Snakemake
+## Usage 
 
-Install Snakemake using [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html):
+### 1. Set up the environment 
 
-    conda create -c bioconda -c conda-forge -n snakemake snakemake
+multipipe requires the conda package manager in order to work. Please install conda by following the [bioconda installation instructions](http://bioconda.github.io/user/install.html#install-conda). In addition, of course, it is essential to install Snakemake; following the steps in the [Snakemake documentation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html). 
 
-For installation details, see the [instructions in the Snakemake documentation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html).
+To run the pipeline, the user needs to create the conda environments first, which will take some minutes.
+This step is done automatically using this command:
 
-### Step 4: Execute workflow
+    snakemake --use-conda --conda-create-envs-only --conda-frontend mamba
 
-Activate the conda environment:
 
-    conda activate snakemake
+### 2. Download multipipe repository from Gitlab.
+Use git clone command to create a local copy. 
 
-Test your configuration by performing a dry-run via
+    git clone https://github.com/cfusterot/multipipe.git
 
-    snakemake --use-conda -n
+### 3. Configure the pipeline.
 
-Execute the workflow locally via
+Before executing the pipeline, the users must configure it according to their samples. To do this, they must fill these files:
 
-    snakemake --use-conda --cores $N
+> TIP: different analysis can be run using just one cloned repository. This is achieved by changing the outdir and logdir in the configuration file. Also different parameters values can be used in the different analysis.
 
-using `$N` cores or run it in a cluster environment via
+#### **a. config.yaml**
 
-    snakemake --use-conda --cluster qsub --jobs 100
+This is the pipeline configuration file, where you can tune all the available parameters to customise your scATAC-seq analysis. 
 
-or
+#### **b. units.tsv**
 
-    snakemake --use-conda --drmaa --jobs 100
+This file is used to configure the FASTQ input files.
 
-If you not only want to fix the software stack but also the underlying OS, use
+An example file ([template_units.tsv](https://github.com/cfusterot/multipipe/master/template_units.tsv) is included in the repository.
 
-    snakemake --use-conda --use-singularity
+Rename it to `units.tsv` and edit its contents according to the following table:
 
-in combination with any of the modes above.
-See the [Snakemake documentation](https://snakemake.readthedocs.io/en/stable/executable.html) for further details.
+| **Field name** 	| **Description**                  |
+|------------	|-----------------------------------------------------	|
+| **sample**     	| Sample name (must match the sample name specified in *samples.tsv*).         	|
+| **unit**       	| Lane identifier from which the samples will be concatenated.|
+| **fq1**        	| Path to FASTQ file for read 1.  	|
+| **fq2**        	| Path to FASTQ file for read 2.    | 
+| **fq3**        	| Path to FASTQ file for read 3.    | 
+
+#### **c. samples.tsv**
+
+This table contains the name of each sample and the experimental condition it belongs to. 
+
+An example file ([template_samples.tsv)](https://github.com/cfusterot/multipipe/master/template_samples.tsv)) is included in the repository. Rename it to `samples.tsv` and edit its contents. 
+
+### 4. Run the pipeline.
+
+Once the pipeline is configured and conda environments are created, the user just needs to run multipipe.
+
+    snakemake --use-conda --use-envmodules --jobs 32 
+
+The mandatory arguments are:
+* **--use-conda**: to install and use the conda environemnts.
+* **--use-envmodules**: to install and use the module environments.
+* **-j**: number of threads/jobs provided to snakemake.
 
 ### Step 5: Investigate results
 
@@ -68,37 +93,4 @@ After successful execution, you can create a self-contained interactive HTML rep
 
 This report can, e.g., be forwarded to your collaborators.
 An example (using some trivial test data) can be seen [here](https://cdn.rawgit.com/snakemake-workflows/rna-seq-kallisto-sleuth/master/.test/report.html).
-
-### Step 6: Commit changes
-
-Whenever you change something, don't forget to commit the changes back to your github copy of the repository:
-
-    git commit -a
-    git push
-
-### Step 7: Obtain updates from upstream
-
-Whenever you want to synchronize your workflow copy with new developments from upstream, do the following.
-
-1. Once, register the upstream repository in your local copy: `git remote add -f upstream git@github.com:snakemake-workflows/snakemake_cellranger_count.git` or `git remote add -f upstream https://github.com/snakemake-workflows/snakemake_cellranger_count.git` if you do not have setup ssh keys.
-2. Update the upstream version: `git fetch upstream`.
-3. Create a diff with the current version: `git diff HEAD upstream/master workflow > upstream-changes.diff`.
-4. Investigate the changes: `vim upstream-changes.diff`.
-5. Apply the modified diff via: `git apply upstream-changes.diff`.
-6. Carefully check whether you need to update the config files: `git diff HEAD upstream/master config`. If so, do it manually, and only where necessary, since you would otherwise likely overwrite your settings and samples.
-
-
-### Step 8: Contribute back
-
-In case you have also changed or added steps, please consider contributing them back to the original repository:
-
-1. [Fork](https://help.github.com/en/articles/fork-a-repo) the original repo to a personal or lab account.
-2. [Clone](https://help.github.com/en/articles/cloning-a-repository) the fork to your local system, to a different place than where you ran your analysis.
-3. Copy the modified files from your analysis to the clone of your fork, e.g., `cp -r workflow path/to/fork`. Make sure to **not** accidentally copy config file contents or sample sheets. Instead, manually update the example config files if necessary.
-4. Commit and push your changes to your fork.
-5. Create a [pull request](https://help.github.com/en/articles/creating-a-pull-request) against the original repository.
-
-## Testing
-
-Test cases are in the subfolder `.test`. They are automatically executed via continuous integration with [Github Actions](https://github.com/features/actions).
 
