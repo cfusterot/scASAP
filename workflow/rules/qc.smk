@@ -9,8 +9,8 @@ rule fastqc:
     input:
         fastqc_input
     output:
-        html="{}/qc/fastqc/{{sample}}/{{sample}}.{{unit}}.r{{read}}_fastqc.html".format(OUTDIR),
-        zip="{}/qc/fastqc/{{sample}}/{{sample}}.{{unit}}.r{{read}}_fastqc.zip".format(OUTDIR)
+        html="{}/{{sample}}/qc/fastqc/{{sample}}.{{unit}}.r{{read}}_fastqc.html".format(OUTDIR),
+        zip="{}/{{sample}}/qc/fastqc/{{sample}}.{{unit}}.r{{read}}_fastqc.zip".format(OUTDIR)
 # the suffix _fastqc.zip is necessary for multiqc to find the file. If not using multiqc, you are free to choose an arbitrary filename
     params:
         lambda wc: "-t {}".format(get_resource("fastqc","threads")) 
@@ -28,14 +28,14 @@ rule fastqc:
         "v1.23.1/bio/fastqc"
 
 def multiqc_input(wc):
-    f=expand("{OUTDIR}/qc/fastqc/{{sample}}/{unit.sample}.{unit.unit}.r{read}_fastqc.zip", unit=units.itertuples(), read=('1','2','3'), OUTDIR=OUTDIR)
+    f=expand("{OUTDIR}/{{sample}}/qc/fastqc/{unit.sample}.{unit.unit}.r{read}_fastqc.zip", unit=units.itertuples(), read=('1','2','3'), OUTDIR=OUTDIR)
     return f
 
 rule multiqc:
     input:
         multiqc_input
     output:
-        report(f"{OUTDIR}/qc/{{sample}}/multiqc_report.html", category="1_QC")
+        report(f"{OUTDIR}/{{sample}}/qc/multiqc_report.html", category="1_QC")
     params: 
         config["multiqc"]
     benchmark:

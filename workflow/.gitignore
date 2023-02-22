@@ -4,3 +4,8 @@ log
 slurm-*.out
 Rplots.pdf
 report.html
+config/samples.tsv
+config/units.tsv
+config/config.yaml
+mt_GoTChA_ATAC_E5_191_S50
+__mt_GoTChA_ATAC_E5_191_S50.mro

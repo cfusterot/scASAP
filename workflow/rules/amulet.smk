@@ -2,10 +2,10 @@ import glob
 
 rule amulet:
     input:
-        fragments="{OUTDIR}/cellranger_count/{sample}/outs/fragments.tsv.gz",
-        singlecells="{OUTDIR}/cellranger_count/{sample}/outs/singlecell.csv"
+        fragments="{OUTDIR}/{sample}/cellranger_count/{sample}/outs/fragments.tsv.gz",
+        singlecells="{OUTDIR}/{sample}/cellranger_count/{sample}/outs/singlecell.csv"
     output:
-        multiplets="{OUTDIR}/amulet/{sample}/MultipletSummary.txt"
+        multiplets="{OUTDIR}/{sample}/amulet/MultipletSummary.txt"
     params:
         amulet_exec="/resources/AMULET/AMULET.sh",
         amulet_folder="/resources/AMULET",
@@ -21,6 +21,6 @@ rule amulet:
     shell:
         """
         {params.amulet_exec} {input.fragments} {input.singlecells} \ 
-        {params.autosomes} {params.blacklist} "{OUTDIR}/amulet/{sample}" \
+        {params.autosomes} {params.blacklist} "{OUTDIR}/{sample}/amulet" \
         {params.amulet_folder}
         """

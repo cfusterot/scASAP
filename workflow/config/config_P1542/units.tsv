@@ -1,0 +1,3 @@
+sample	unit	fq1	fq2	fq3
+P1542_CHIP_multiome_S1	1	/data/gpfs-1/users/cofu10_c/scratch/CHIP_multiome_ATAC/P1542_CHIP_multiome_S1_L001_R1_001.fastq.gz	/data/gpfs-1/users/cofu10_c/scratch/CHIP_multiome_ATAC/P1542_CHIP_multiome_S1_L001_R2_001.fastq.gz	/data/gpfs-1/users/cofu10_c/scratch/CHIP_multiome_ATAC/P1542_CHIP_multiome_S1_L001_R3_001.fastq.gz
+P1542_CHIP_multiome_S1	2	/data/gpfs-1/users/cofu10_c/scratch/CHIP_multiome_ATAC/P1542_CHIP_multiome_S1_L002_R1_001.fastq.gz	/data/gpfs-1/users/cofu10_c/scratch/CHIP_multiome_ATAC/P1542_CHIP_multiome_S1_L002_R2_001.fastq.gz	/data/gpfs-1/users/cofu10_c/scratch/CHIP_multiome_ATAC/P1542_CHIP_multiome_S1_L002_R3_001.fastq.gz

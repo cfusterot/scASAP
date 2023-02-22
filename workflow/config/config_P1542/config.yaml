@@ -3,8 +3,8 @@
 # one row per sample. It can be parsed easily via pandas.
 samples: "config/samples.tsv"
 units: "config/units.tsv"
-out: "/data/gpfs-1/users/cofu10_c/scratch/P1813/out"
-log: "/data/gpfs-1/users/cofu10_c/scratch/P1813/log" 
+out: "/data/gpfs-1/users/cofu10_c/scratch/test_multipipe/out"
+log: "/data/gpfs-1/users/cofu10_c/scratch/test_multipipe/log" 
 
 # Configure the correspondent environmental modules and program paths for version control
 envmodules:
@@ -15,7 +15,7 @@ programpaths:
 # Analysis parameters
 multiqc: "--config config/multiqc_config.yaml"
 cellranger:
-    path_to_outs: "/data/gpfs-1/groups/ag_ludwig/work/P1813_20230130/demuxed/HLTFNDSX5/mt_GoTChA_ATAC_E5_191"  
+    path_to_outs: "/data/gpfs-1/groups/ag_ludwig/work/P1542_20220610/P1542_ATAC_multiome_demux/H7YHLDRX2/CHIP_multiome_ATAC"  
     # Path of folder containing 10x-compatible reference (--reference)
     reference: "/data/gpfs-1/groups/ag_ludwig/work/genome_ref/refdata-cellranger-arc-GRCh38-2020-mtMask"
 amulet:
@@ -35,6 +35,6 @@ resources:
       threads: 4
       mem_mb: 32000
     cellranger:
-        threads: 4
+        threads: 8
         mem_mb: 120000
-        walltime: 4320
+        walltime: 1160
