@@ -17,10 +17,10 @@ rule cellranger_count:
     input:
         fq=get_fq_path
     output:
-        singlecells="{OUTDIR}/{sample}/cellranger_count/{sample}/outs/singlecell.csv",
-        fragments="{OUTDIR}/{sample}/cellranger_count/{sample}/outs/fragments.tsv.gz",
-        filtered="{OUTDIR}/{sample}/cellranger_count/{sample}/outs/filtered_feature_bc_matrix.h5",
-        bam="{OUTDIR}/{sample}/cellranger_count/{sample}/outs/possorted_genome_bam.bam"
+        singlecells="{}/{{sample}}/cellranger_count/outs/singlecell.csv".format(OUTDIR),
+        fragments="{}/{{sample}}/cellranger_count/outs/fragments.tsv.gz".format(OUTDIR),
+        filtered="{}/{{sample}}/cellranger_count/outs/filtered_feature_bc_matrix.h5".format(OUTDIR),
+        bam="{}/{{sample}}/cellranger_count/outs/possorted_genome_bam.bam".format(OUTDIR)
     params:
         reference=config['cellranger']['reference']
     envmodules:
@@ -30,9 +30,9 @@ rule cellranger_count:
         mem_mb=get_resource("cellranger", "mem_mb"),
         walltime=get_resource("cellranger", "walltime")
     log:
-        err="{}/{sample}/cellranger.err".format(LOGDIR),
-        out="{}/{sample}/cellranger.out".format(LOGDIR),
-        time="{}/{sample}/cellranger.time".format(LOGDIR)"
+        err="{}/{{sample}}/cellranger.err".format(LOGDIR),
+        out="{}/{{sample}}/cellranger.out".format(LOGDIR),
+        time="{}/{{sample}}/cellranger.time".format(LOGDIR)
     shell:
         """
         {DATETIME} > {log.time} &&
@@ -40,6 +40,6 @@ rule cellranger_count:
         --reference={params.reference} \
         --fastqs={input.fq} \
         2> {log.err} > {log.out} &&
-        mv {wildcards.sample} "{OUTDIR}/{wildcards.sample}/cellranger_count/" &&
+        mv {wildcards.sample} "{OUTDIR}/{wildcards.sample}/cellranger_count" &&
         {DATETIME} >> {log.time}
         """

@@ -31,9 +31,9 @@ rule fastq_screen_indexes:
     output:
         "resources/FastQ_Screen_Genomes/fastq_screen.conf"
     log:
-        "{}/{sample}/fastq_screen_idx.log".format{LOGDIR}
+        "{}/fastq_screen_idx.log".format(LOGDIR)
     benchmark:
-        "{}/{sample}/fastq_screen_idx.bmk".format{LOGDIR}
+        "{}/fastq_screen_idx.bmk".format(LOGDIR)
     conda:
         "envs/fastq_screen.yaml"
     threads: get_resource("fastq_screen", "threads")
@@ -41,7 +41,7 @@ rule fastq_screen_indexes:
         outdir=config["fastq_screen"]["index_dir"]
     resources:
         mem_mb=get_resource("fastq_screen", "mem_mb"),
-        walltime=get_resource("fastq_screen", "walltime)
+        walltime=get_resource("fastq_screen", "walltime")
     shell:
         """
         fastq_screen --threads {threads} --get_genomes --outdir{params.outdir} /
@@ -51,10 +51,10 @@ rule fastq_screen_indexes:
 rule fastq_screen:
     input:
         lambda wc: units.loc[(wc.sample,wc.unit)]['fq' + wc.read],
-        conf="{}/FastQ_Screen_Genomes/fastq_screen.conf".format(config["parameters"]["fastq_screen_indexes"]["outdir"])
+        conf="{}/FastQ_Screen_Genomes/fastq_screen.conf".format(config["fastq_screen"]["index_dir"])
     output:
-        txt="{}/{sample}/qc/fastq_screen/{{sample}}.{{unit}}.r{{read}}.fastq_screen.txt".format(OUTDIR),
-        png="{}/{sample}/qc/fastq_screen/{{sample}}.{{unit}}.r{{read}}.fastq_screen.png".format(OUTDIR)
+        txt="{}/{{sample}}/qc/fastq_screen/{{sample}}.{{unit}}.r{{read}}.fastq_screen.txt".format(OUTDIR),
+        png="{}/{{sample}}/qc/fastq_screen/{{sample}}.{{unit}}.r{{read}}.fastq_screen.png".format(OUTDIR)
     log:
         "{}/{{sample}}/fastq_screen.{{unit}}.r{{read}}.log".format(LOGDIR)
     benchmark:
@@ -74,7 +74,7 @@ def multiqc_input(wc):
     f=expand("{OUTDIR}/{{sample}}/qc/fastqc/{unit.sample}.{unit.unit}.r{read}_fastqc.zip", unit=units.itertuples(), read=('1','2','3'), OUTDIR=OUTDIR)
     try: 
         if config["parameters"]["fastq_screen"]["enabled"]:
-            f +=expand("{OUTDIR}/{sample}/qc/fastq_screen/{unit.sample}.{unit.unit}.r{read}.fastq_screen.txt",
+            f +=expand("{OUTDIR}/{{sample}}/qc/fastq_screen/{unit.sample}.{unit.unit}.r{read}.fastq_screen.txt",
 unit=unit.itertuples(), OUTDIR=OUTDIR, read=('1', '2', '3'))
     except KeyError:
         print("FASTQ_SCREEN disabled by config file. Skipping...")

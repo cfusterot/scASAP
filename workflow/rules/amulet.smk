@@ -2,8 +2,8 @@ import glob
 
 rule amulet:
     input:
-        fragments="{OUTDIR}/{sample}/cellranger_count/{sample}/outs/fragments.tsv.gz",
-        singlecells="{OUTDIR}/{sample}/cellranger_count/{sample}/outs/singlecell.csv"
+        fragments="{OUTDIR}/{sample}/cellranger_count/outs/fragments.tsv.gz",
+        singlecells="{OUTDIR}/{sample}/cellranger_count/outs/singlecell.csv"
     output:
         multiplets="{OUTDIR}/{sample}/amulet/MultipletSummary.txt"
     params:

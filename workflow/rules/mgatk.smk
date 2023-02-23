@@ -2,7 +2,7 @@ import glob
 
 rule mgatk:
     input:
-        bam="{OUTDIR}/{sample}/cellranger_count/{sample}/outs/possorted_genome_bam.bam"
+        bam="{OUTDIR}/{sample}/cellranger_count/outs/possorted_genome_bam.bam"
     output:
         ref="{OUTDIR}/{sample}/mgatk/chrM_refAllele.txt"
     conda:
@@ -20,7 +20,7 @@ rule mgatk:
         {DATETIME} > {log.time} &&
         mgatk tenx -i bam \
         -n {sample} -o {OUTDIR}/{sample}/mgatk/ \
-        -bt CB -b {OUTDIR}/{sample}/cellranger_count/{sample}/outs/filtered_peak_bc_matrix/barcodes.tsv \ 
+        -bt CB -b {OUTDIR}/{sample}/cellranger_count/outs/filtered_peak_bc_matrix/barcodes.tsv \ 
         2> {log.err} > {log.out} &&
         {DATETIME} >> {log.time}
         """
