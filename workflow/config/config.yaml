@@ -28,6 +28,20 @@ amulet:
 mgatk:
    enable: TRUE 
 
+gotcha:
+  enable: TRUE
+  whitelist: "/data/gpfs-1/users/cofu10_c/work/references/barcodes/737K-cratac-v1.txt"
+  primer:
+    primer_sequence: "AAAGCCTGTAGTTTTACTTACTCTCGTCTCCACAG"
+    reverse_complement: TRUE
+    max_mismatch: 3
+  mutation:
+    read: "R2"
+    start: 35
+    end: 38
+    mut_sequence: "AAA"
+    wt_sequence: "ACA"
+
 # Cluster resources configuration
 resources:
     default:
@@ -43,3 +57,7 @@ resources:
         threads: 4
         mem_mb: 120000
         walltime: 4320
+    gotcha:
+        threads: 4
+        mem_mb: 80000
+        walltime: 1140
