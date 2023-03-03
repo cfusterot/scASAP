@@ -17,11 +17,8 @@ rule cellranger_count:
     input:
         fq=get_fq_path
     output:
-        singlecells="{}/{{sample}}/cellranger_count/outs/singlecell.csv".format(OUTDIR),
-        fragments="{}/{{sample}}/cellranger_count/outs/fragments.tsv.gz".format(OUTDIR),
-        filtered="{}/{{sample}}/cellranger_count/outs/filtered_feature_bc_matrix.h5".format(OUTDIR),
-        bam="{}/{{sample}}/cellranger_count/outs/possorted_genome_bam.bam".format(OUTDIR)
-    params:
+        finish="{}/{{sample}}/cellranger_count/cellranger.finish".format(OUTDIR)
+    params:    
         reference=config['cellranger']['reference']
     envmodules:
         config['envmodules']['cellranger']
@@ -40,6 +37,7 @@ rule cellranger_count:
         --reference={params.reference} \
         --fastqs={input.fq} \
         2> {log.err} > {log.out} &&
-        mv {wildcards.sample} "{OUTDIR}/{wildcards.sample}/cellranger_count" &&
-        {DATETIME} >> {log.time}
+        mv "{{wildcards.sample}}/*" "{OUTDIR}/{wildcards.sample}/cellranger_count" &&
+        touch "{OUTDIR}/{wildcards.sample}/cellranger_count/cellranger.finish"
+        {DATETIME} >> {log.time} 
         """

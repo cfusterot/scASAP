@@ -47,10 +47,10 @@ rule all:
         # Subsequent target rules can be specified below. They should start with all_*.
         expand(["{OUTDIR}/{sample}/cellranger_count/outs/singlecell.csv",
                 "{OUTDIR}/{sample}/cellranger_count/outs/fragments.tsv.gz",
-                "{OUTDIR}/{sample}/cellranger_count/outs/filtered_feature_bc_matrix.h5",
-                "{OUTDIR}/{sample}/cellranger_count/outs/possorted_genome_bam.bam",
+                "{OUTDIR}/{sample}/cellranger_count/outs/filtered_peak_bc_matrix.h5",
+                "{OUTDIR}/{sample}/cellranger_count/outs/possorted_bam.bam",
                 "{OUTDIR}/{sample}/qc/multiqc_report.html",
-                "{OUTDIR}/{sample}/mgatk/chrM_refAllele.txt",
+                "{OUTDIR}/{sample}/mgatk/final/chrM_refAllele.txt",
                 "{OUTDIR}/{sample}/amulet/MultipletSummary.txt"
                 ], sample=samples['sample'], OUTDIR=OUTDIR)
 
