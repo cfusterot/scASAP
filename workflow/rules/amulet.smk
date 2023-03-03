@@ -10,8 +10,7 @@ rule amulet:
     conda:
         "../envs/amulet.yaml"
     params:
-        amulet_exec="../resources/AMULET/AMULET.sh",
-        amulet_folder="../resources/AMULET",
+        amulet="resources/AMULET",
         autosomes=config['amulet']['autosomes'],
         blacklist=config['amulet']['blacklist']
     threads: get_resource("amulet", "threads")
@@ -23,6 +22,8 @@ rule amulet:
         out="{OUTDIR}/logs/amulet/{sample}.out",
     shell:
         """
-        mkdir {OUTDIR}/{wildcards.sample}/amulet &&
-        bash {params.amulet_exec} {input.fragments} {input.singlecells} {params.autosomes} {params.blacklist} {OUTDIR}/{wildcards.sample}/amulet {params.amulet_folder}
+        chmod +x {params.amulet}/AMULET.sh &&
+        {params.amulet}/AMULET.sh {input.fragments} {input.singlecells} \
+        {params.autosomes} {params.blacklist} \
+        {OUTDIR}/{wildcards.sample}/amulet {params.amulet}
         """

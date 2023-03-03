@@ -1,7 +1,9 @@
 name: amulet
 channels:
   - conda-forge
+  - bioconda
 dependencies:
+  - java-jdk
   - python=3
   - pip:
     - statsmodels
