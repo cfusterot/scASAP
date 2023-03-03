@@ -1,0 +1,10 @@
+name: amulet
+channels:
+  - conda-forge
+dependencies:
+  - python=3.6   # or 2.7
+  - pip:
+    - statsmodels
+    - pandas
+    - scipy
+    - numpy

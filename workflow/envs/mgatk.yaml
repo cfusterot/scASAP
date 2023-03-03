@@ -1,7 +1,13 @@
 name: mgatk
 channels:
   - conda-forge
+  - bioconda
 dependencies:
+  - r-base
+  - r-matrix
+  - r-data.table
+  - bioconductor-summarizedexperiment
+  - bioconductor-genomicranges
   - python=3.6   # or 2.7
   - pip:
     - mgatk

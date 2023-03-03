@@ -23,7 +23,7 @@ cellranger:
     reference: "/data/gpfs-1/groups/ag_ludwig/work/genome_ref/refdata-cellranger-arc-GRCh38-2020-mtMask"
 amulet:
     autosomes: "/data/gpfs-1/groups/ag_ludwig/work/software/AMULET/human_autosomes.txt"
-    blacklist: "data/gpfs-1/groups/ag_ludwig/work/genome_ref/ENCODE_blacklist/GRCh38_unified_blacklist.bed"
+    blacklist: "/data/gpfs-1/groups/ag_ludwig/work/genome_ref/ENCODE_blacklist/GRCh38_unified_blacklist.bed"
 
 mgatk:
    enable: TRUE 

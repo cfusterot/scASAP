@@ -2,9 +2,10 @@ import glob
 
 rule mgatk:
     input:
-        bam="{OUTDIR}/{sample}/cellranger_count/outs/possorted_genome_bam.bam"
+        finish="{OUTDIR}/{sample}/cellranger_count/cellranger.finish",
+        bam="{OUTDIR}/{sample}/cellranger_count/outs/possorted_bam.bam"
     output:
-        ref="{OUTDIR}/{sample}/mgatk/chrM_refAllele.txt"
+        ref="{OUTDIR}/{sample}/mgatk/final/chrM_refAllele.txt"
     conda:
         "../envs/mgatk.yaml"
     threads: get_resource("mgatk", "threads")
@@ -18,9 +19,9 @@ rule mgatk:
     shell:
         """
         {DATETIME} > {log.time} &&
-        mgatk tenx -i bam \
-        -n {sample} -o {OUTDIR}/{sample}/mgatk/ \
-        -bt CB -b {OUTDIR}/{sample}/cellranger_count/outs/filtered_peak_bc_matrix/barcodes.tsv \ 
+        mgatk tenx -i {input.bam} \
+        -n {wildcards.sample} -o {OUTDIR}/{wildcards.sample}/mgatk/ \
+        -bt CB -b {OUTDIR}/{wildcards.sample}/cellranger_count/outs/filtered_peak_bc_matrix/barcodes.tsv \ 
         2> {log.err} > {log.out} &&
         {DATETIME} >> {log.time}
         """
