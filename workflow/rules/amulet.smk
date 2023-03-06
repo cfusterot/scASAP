@@ -18,8 +18,8 @@ rule amulet:
         mem_mb=get_resource("amulet", "mem_mb"),
         walltime=get_resource("amulet", "walltime")
     log:
-        err="{OUTDIR}/logs/amulet/{sample}.err",
-        out="{OUTDIR}/logs/amulet/{sample}.out",
+        err="{OUTDIR}/logs/{sample}/amulet.err",
+        out="{OUTDIR}/logs/{sample}/amulet.out",
     shell:
         """
         chmod +x {params.amulet}/AMULET.sh &&
