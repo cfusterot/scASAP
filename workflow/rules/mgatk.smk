@@ -13,15 +13,12 @@ rule mgatk:
         mem_mb=get_resource("mgatk", "mem_mb"),
         walltime=get_resource("mgatk", "walltime")
     log:
-        err="{OUTDIR}/logs/mgatk/{sample}.err",
-        out="{OUTDIR}/logs/mgatk/{sample}.out",
-        time="{OUTDIR}/logs/time/mgatk/{sample}"
+        err="{OUTDIR}/logs/{sample}/mgatk.err",
+        out="{OUTDIR}/logs/{sample}/mgatk.out",
     shell:
         """
-        {DATETIME} > {log.time} &&
         mgatk tenx -i {input.bam} \
         -n {wildcards.sample} -o {OUTDIR}/{wildcards.sample}/mgatk/ \
         -bt CB -b {OUTDIR}/{wildcards.sample}/cellranger_count/outs/filtered_peak_bc_matrix/barcodes.tsv \ 
         2> {log.err} > {log.out} &&
-        {DATETIME} >> {log.time}
         """
