@@ -1,11 +1,11 @@
-# Multipipe: a Snakemake workflow for 10X Genomics' single-cell ATAC sequencing data analysis
+# scASAP: single-cell ATAC Sequencing Analysis Pipeline
 
 [![Snakemake](https://img.shields.io/badge/snakemake-≥5.7.0-brightgreen.svg)](https://snakemake.bitbucket.io)
-[Pipeline status](https://github.com/cfusterot/multipipe/commits/master)
+[Pipeline status](https://github.com/cfusterot/scASAP/commits/master)
 
-multipipe is a Snakemake pipeline that performs a comprehensive single-cell ATAC-seq data analysis, covering from the basic steps (QC, alignment, quantification) to more advanced downstream analyses.
+**scASAP** is a Snakemake pipeline that performs a comprehensive single-cell ATAC-seq data analysis, covering from the basic steps (QC, alignment, quantification) to more advanced downstream analyses.
 
-multipipe makes extensive use of Snakemake's integration with the conda package manager, to automatically take care of software requirements and dependencies. Furthermore, it executes `cellranger count` on FASTQ files produced using 10X Genomics kits. The pipeline's flexibility allows users to adjust it to the distinct experimental characteristics. 
+**scASAP** makes extensive use of Snakemake's integration with the conda package manager, to automatically take care of software requirements and dependencies. Furthermore, it executes `cellranger count` on FASTQ files produced using 10X Genomics kits. The pipeline's flexibility allows users to adjust it to the distinct experimental characteristics. 
 
 ## Authors
 
@@ -29,7 +29,7 @@ For setting up the pipeline, three configuration files need to be modified. A ge
 
 ### 1. Set up the environment 
 
-multipipe requires the conda package manager in order to work. Please install conda by following the [bioconda installation instructions](http://bioconda.github.io/user/install.html#install-conda). In addition, of course, it is essential to install Snakemake; following the steps in the [Snakemake documentation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html). 
+**scASAP** requires the conda package manager in order to work. Please install conda by following the [bioconda installation instructions](http://bioconda.github.io/user/install.html#install-conda). In addition, of course, it is essential to install Snakemake; following the steps in the [Snakemake documentation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html). 
 
 To run the pipeline, the user needs to create the conda environments first, which will take some minutes.
 This step is done automatically using this command:
@@ -37,10 +37,10 @@ This step is done automatically using this command:
     snakemake --use-conda --conda-create-envs-only --conda-frontend mamba
 
 
-### 2. Download multipipe repository from Gitlab.
+### 2. Download **scASAP** repository from Gitlab.
 Use git clone command to create a local copy. 
 
-    git clone https://github.com/cfusterot/multipipe.git
+    git clone https://github.com/cfusterot/scASAP.git
 
 ### 3. Configure the pipeline.
 
@@ -56,7 +56,7 @@ This is the pipeline configuration file, where you can tune all the available pa
 
 This file is used to configure the FASTQ input files.
 
-An example file ([template_units.tsv](https://github.com/cfusterot/multipipe/master/template_units.tsv) is included in the repository.
+An example file ([template_units.tsv](https://github.com/cfusterot/scASAP/master/template_units.tsv) is included in the repository.
 
 Rename it to `units.tsv` and edit its contents according to the following table:
 
@@ -72,11 +72,11 @@ Rename it to `units.tsv` and edit its contents according to the following table:
 
 This table contains the name of each sample and the experimental condition it belongs to. 
 
-An example file ([template_samples.tsv)](https://github.com/cfusterot/multipipe/master/template_samples.tsv)) is included in the repository. Rename it to `samples.tsv` and edit its contents. 
+An example file ([template_samples.tsv)](https://github.com/cfusterot/scASAP/master/template_samples.tsv)) is included in the repository. Rename it to `samples.tsv` and edit its contents. 
 
 ### 4. Run the pipeline.
 
-Once the pipeline is configured and conda environments are created, the user just needs to run multipipe.
+Once the pipeline is configured and conda environments are created, the user just needs to run scASAP.
 
     snakemake --use-conda --use-envmodules --jobs 32 
 

@@ -7,9 +7,6 @@ properties:
   sample:
     type: string
     description: sample name/identifier
-  unit: 
-    type: string
-    description: lane number per sample
   fqs:
     type: string
     description: complete name of the R1 file
@@ -17,5 +14,4 @@ properties:
 # columns that the config/samples.tsv file must have to pass schema validation
 required:
   - sample
-  - unit
   - fqs
