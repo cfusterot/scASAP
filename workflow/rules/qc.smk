@@ -6,7 +6,6 @@ import pandas as pd
 def fastq_input(wc):
     directory=units.loc[wc.sample]['fqs']
     return [os.path.join(directory, file) for file in os.listdir(directory)]
-    #return directory 
 
 def get_fastq_dir(wc):
     directory=units.loc[wc.sample]['fqs']
@@ -17,20 +16,10 @@ def get_fastq_name(wc):
     s = wc.sample + "_"
     return [file.split(s)[1].split('.fastq.gz')[0] for file in os.listdir(directory)]
 
-#def get_fastq_input(wc):
-#    directory=units.loc[wc.sample]['fqs']
-#    name=get_fastq_name(wc.sample)
-#    sample=wc.sample
-#    fq=expand("{DIR}/{sample}_{name}.fastq.gz", DIR=directory, sample=sample, name=name)
-#    return fq 
-
 # -- Rules -- #
 rule fastqc:
     input:
         fq= lambda wc: expand("{DIR}/{{sample}}_{{name}}.fastq.gz", DIR = units.loc[wc.sample]['fqs'])
-        #get_fastq_input
-        #fq=expand("{DIR}/{{sample}}_{name}.fastq.gz", DIR = get_fastq_dir, name= get_fastq_name) 
-        #fastq_input
     output:
         html=expand("{OUTDIR}/{{sample}}/qc/fastqc/{{sample}}_{{name}}_fastqc.html", OUTDIR=OUTDIR),
         zip=expand("{OUTDIR}/{{sample}}/qc/fastqc/{{sample}}_{{name}}_fastqc.zip", OUTDIR=OUTDIR)
@@ -71,7 +60,7 @@ rule fastq_screen_indexes:
 
 rule fastq_screen:
     input:
-        fq= lambda wc: expand("{DIR}/{{sample}}/qc/fastqc/{{sample}}_{{name}}_fastqc.html", DIR = units.loc[wc.sample]['fqs']),
+        fq=lambda wc: expand("{DIR}/{{sample}}/qc/fastqc/{{sample}}_{{name}}_fastqc.html", DIR = units.loc[wc.sample]['fqs']),
         conf="{}/FastQ_Screen_Genomes/fastq_screen.conf".format(config["fastq_screen"]["index_dir"])
     output:
         txt=expand("{OUTDIR}/{{sample}}/qc/fastq_screen/{{sample}}_{{name}}.fastq_screen.txt", OUTDIR=OUTDIR),
@@ -92,7 +81,6 @@ rule fastq_screen:
         "v1.23.4/bio/fastq_screen"
 
 def multiqc_input(wc):
-    #f=expand("{OUTDIR}/{{sample}}/qc/fastqc/{{sample}}_{{name}}_fastqc.zip", OUTDIR=OUTDIR)
     f=expand("{OUTDIR}/{{sample}}/qc/fastqc/{{sample}}_{name}_fastqc.zip", OUTDIR=OUTDIR, name = get_fastq_name(wc)) 
     try: 
         if config["parameters"]["fastq_screen"]["enabled"]:
