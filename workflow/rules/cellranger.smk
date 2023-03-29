@@ -15,7 +15,7 @@ def get_fq_path(wc):
 
 rule cellranger_count:
     input:
-        fq=get_fq_path
+        fq=lambda wc: units["fqs"][wc.sample]
     output:
         finish="{}/{{sample}}/cellranger_count/cellranger.finish".format(OUTDIR)
     params:    

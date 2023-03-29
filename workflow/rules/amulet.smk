@@ -2,14 +2,14 @@ import glob
 
 rule amulet:
     input:
-        finish="{OUTDIR}/{sample}/cellranger_count/cellranger.finish",
-        fragments="{OUTDIR}/{sample}/cellranger_count/outs/fragments.tsv.gz",
-        singlecells="{OUTDIR}/{sample}/cellranger_count/outs/singlecell.csv"
+        finish="{OUTDIR}/{sample}/cellranger_count/cellranger.finish"
     output:
         multiplets="{OUTDIR}/{sample}/amulet/MultipletSummary.txt"
     conda:
         "../envs/amulet.yaml"
     params:
+        fragments="{OUTDIR}/{sample}/cellranger_count/outs/fragments.tsv.gz",
+        singlecells="{OUTDIR}/{sample}/cellranger_count/outs/singlecell.csv",
         amulet="resources/AMULET",
         autosomes=config['amulet']['autosomes'],
         blacklist=config['amulet']['blacklist']
@@ -23,7 +23,7 @@ rule amulet:
     shell:
         """
         chmod +x {params.amulet}/AMULET.sh &&
-        {params.amulet}/AMULET.sh {input.fragments} {input.singlecells} \
+        {params.amulet}/AMULET.sh {params.fragments} {params.singlecells} \
         {params.autosomes} {params.blacklist} \
         {OUTDIR}/{wildcards.sample}/amulet {params.amulet}
         """

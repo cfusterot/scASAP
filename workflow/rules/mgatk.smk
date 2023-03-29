@@ -2,7 +2,8 @@ import glob
 
 rule mgatk:
     input:
-        finish="{OUTDIR}/{sample}/cellranger_count/cellranger.finish",
+        finish="{OUTDIR}/{sample}/cellranger_count/cellranger.finish"
+    params:
         bam="{OUTDIR}/{sample}/cellranger_count/outs/possorted_bam.bam"
     output:
         ref="{OUTDIR}/{sample}/mgatk/final/chrM_refAllele.txt"
@@ -17,7 +18,7 @@ rule mgatk:
         out="{OUTDIR}/logs/{sample}/mgatk.out",
     shell:
         """
-        mgatk tenx -i {input.bam} \
+        mgatk tenx -i {params.bam} \
         -n {wildcards.sample} -o {OUTDIR}/{wildcards.sample}/mgatk/ \
         -bt CB -b {OUTDIR}/{wildcards.sample}/cellranger_count/outs/filtered_peak_bc_matrix/barcodes.tsv \ 
         2> {log.err} > {log.out} &&

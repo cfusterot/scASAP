@@ -1,6 +1,7 @@
 # The main entry point of your workflow.
 # After configuring, running snakemake -n in a clone of this repository should successfully execute a dry-run of the workflow.
 import pandas as pd
+import os
 
 report: "report/workflow.rst"
 # Include rule files
@@ -17,9 +18,8 @@ except FileNotFoundError:
     sys.exit(1)
 
 try:
-    units = pd.read_csv(config["units"], dtype=str, sep="\t", comment="#").set_index(["sample", "unit"], drop=False)
+    units = pd.read_csv(config["units"], dtype=str, sep="\t", comment="#").set_index(["sample"], drop=False)
     validate(units, schema="schemas/units.schema.yaml")
-    units.index = units.index.set_levels([i.astype(str) for i in units.index.levels])  # enforce str in index
 except FileNotFoundError:
     warning(f"ERROR: the units file ({config['units']}) does not exist. Please see the README file for details. Quitting now.")
     sys.exit(1)    
@@ -31,24 +31,19 @@ def get_resource(rule,resource):
     except KeyError:
         return config["resources"]["default"][resource]
 
-def get_fastq(dir, folder):
-    """Returns a string that uses Snakemake's {} mini language"""
-    result = []
-    path = os.path.join(dir,folder)
-    for p in os.listdir(path):
-    # check if current path is a file
-        if os.p.isfile(os.p.join(path, p)):
-            result.append(p)
-    return result
+#def get_fastq_name(wc):
+#    directory=units.loc[wc]['fqs']
+#    s = wc + "_"
+#    return [file.split(s[0])[1].split('.fastq.gz')[0] for file in os.listdir(directory)]
+
 # Final output 
 rule all:
     input:
         # The first rule should define the default target files
         # Subsequent target rules can be specified below. They should start with all_*.
-        expand(["{OUTDIR}/{sample}/cellranger_count/outs/singlecell.csv",
-                "{OUTDIR}/{sample}/cellranger_count/outs/fragments.tsv.gz",
-                "{OUTDIR}/{sample}/cellranger_count/outs/filtered_peak_bc_matrix.h5",
-                "{OUTDIR}/{sample}/cellranger_count/outs/possorted_bam.bam",
+        expand(["{OUTDIR}/{sample}/cellranger_count/cellranger.finish",
+                #"{OUTDIR}/{sample}/qc/fastqc/{sample}_{name}_fastqc.html",
+                #"{OUTDIR}/{sample}/qc/fastqc/{sample}_{name}_fastqc.zip"
                 "{OUTDIR}/{sample}/qc/multiqc_report.html",
                 "{OUTDIR}/{sample}/mgatk/final/chrM_refAllele.txt",
                 "{OUTDIR}/{sample}/amulet/MultipletSummary.txt"

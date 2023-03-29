@@ -3,8 +3,8 @@
 # one row per sample. It can be parsed easily via pandas.
 samples: "config/samples.tsv"
 units: "config/units.tsv"
-out: "/data/gpfs-1/users/cofu10_c/scratch/P1813/out"
-log: "/data/gpfs-1/users/cofu10_c/scratch/P1813/log" 
+out: "/data/gpfs-1/users/cofu10_c/scratch/P1813_2nd/out"
+log: "/data/gpfs-1/users/cofu10_c/scratch/P1813_2nd/log" 
 
 # Configure the correspondent environmental modules and program paths for version control
 envmodules:
