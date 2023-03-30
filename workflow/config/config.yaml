@@ -1,31 +1,39 @@
 # This file should contain everything to configure the workflow on a global scale.
-# In case of sample based data, it should be complemented by a samples.tsv file that contains
-# one row per sample. It can be parsed easily via pandas.
+# It should be complemented by a samples.tsv file that contains one row per sample.
+# The units.tsv file should contain the location of each project folder
+# (containing fastq files).
+
+# -- 1. Samples configuration -- #
 samples: "config/samples.tsv"
 units: "config/units.tsv"
 out: "/data/gpfs-1/users/cofu10_c/scratch/P1813_2nd/out"
 log: "/data/gpfs-1/users/cofu10_c/scratch/P1813_2nd/log" 
 
-# Configure the correspondent environmental modules and program paths for version control
+# -- 2. Program configuration -- # Configure the correspondent environmental modules and program paths for version control
 envmodules:
     cellranger: "/fast/groups/ag_ludwig/Modules/modulefiles/cellranger-atac/2.1.0"
 
-# Analysis parameters
+# -- 3. Analysis parameters -- #
+# --- a. QC --- #
 fastq_screen:
       enabled: False
       index_dir: "/data/gpfs-1/users/cofu10_c/scratch/P1813/fastq_indexes"
 multiqc: "--config config/multiqc_config.yaml"
+
+# --- b. Alignment --- #
 cellranger:
-    path_to_outs: "/data/gpfs-1/groups/ag_ludwig/work/P1813_20230130/demuxed/HLTFNDSX5/mt_GoTChA_ATAC_E5_191"  
-    # Path of folder containing 10x-compatible reference (--reference)
     reference: "/data/gpfs-1/groups/ag_ludwig/work/genome_ref/refdata-cellranger-arc-GRCh38-2020-mtMask"
+
+# --- c. Doublet identification --- #
 amulet:
     autosomes: "/data/gpfs-1/groups/ag_ludwig/work/software/AMULET/human_autosomes.txt"
     blacklist: "/data/gpfs-1/groups/ag_ludwig/work/genome_ref/ENCODE_blacklist/GRCh38_unified_blacklist.bed"
 
+# --- d. (optional) Mitochondrial variant identification --- #
 mgatk:
    enable: TRUE 
 
+# --- e. (optional) Genotyping with gotcha --- #
 gotcha:
   enable: TRUE
   whitelist: "/data/gpfs-1/users/cofu10_c/work/references/barcodes/737K-cratac-v1.txt"
@@ -40,7 +48,7 @@ gotcha:
     mut_sequence: "AAA"
     wt_sequence: "ACA"
 
-# Cluster resources configuration
+# -- Cluster resources configuration -- #
 resources:
     default:
         threads: 1
