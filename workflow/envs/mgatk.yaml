@@ -11,3 +11,5 @@ dependencies:
   - python=3.6   # or 2.7
   - pip:
     - mgatk
+    - pyyaml
+    - matplotlib

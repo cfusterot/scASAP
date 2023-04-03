@@ -1,8 +1,7 @@
-# The main entry point of your workflow.
-# After configuring, running snakemake -n in a clone of this repository should successfully execute a dry-run of the workflow.
 import pandas as pd
 import os
 
+# -- Snakefile basic configuration -- #
 report: "report/workflow.rst"
 # Include rule files
 include: "rules/common.smk"
@@ -10,6 +9,7 @@ include: "rules/common.smk"
 OUTDIR = config["out"]
 LOGDIR = config["log"]
 
+# -- Read samples file -- #
 try:
     samples = pd.read_csv(config["samples"], sep="\t", comment="#").set_index("sample", drop=False)
     validate(samples, schema="schemas/samples.schema.yaml")
@@ -17,6 +17,7 @@ except FileNotFoundError:
     warning(f"ERROR: the samples file ({config['samples']}) does not exist. Please see the README file for details. Quitting now.")
     sys.exit(1)
 
+# -- Read units file -- #
 try:
     units = pd.read_csv(config["units"], dtype=str, sep="\t", comment="#").set_index(["sample"], drop=False)
     validate(units, schema="schemas/units.schema.yaml")
@@ -24,32 +25,23 @@ except FileNotFoundError:
     warning(f"ERROR: the units file ({config['units']}) does not exist. Please see the README file for details. Quitting now.")
     sys.exit(1)    
 
-# Auxiliary functions
+# -- Auxiliary functions -- #
 def get_resource(rule,resource):
     try:
         return config["resources"][rule][resource]
     except KeyError:
         return config["resources"]["default"][resource]
 
-#def get_fastq_name(wc):
-#    directory=units.loc[wc]['fqs']
-#    s = wc + "_"
-#    return [file.split(s[0])[1].split('.fastq.gz')[0] for file in os.listdir(directory)]
-
-# Final output 
+# -- Final output -- #
 rule all:
     input:
-        # The first rule should define the default target files
-        # Subsequent target rules can be specified below. They should start with all_*.
         expand(["{OUTDIR}/{sample}/cellranger_count/cellranger.finish",
-                #"{OUTDIR}/{sample}/qc/fastqc/{sample}_{name}_fastqc.html",
-                #"{OUTDIR}/{sample}/qc/fastqc/{sample}_{name}_fastqc.zip"
                 "{OUTDIR}/{sample}/qc/multiqc_report.html",
-                "{OUTDIR}/{sample}/mgatk/final/chrM_refAllele.txt",
+                "{OUTDIR}/{sample}/mgatk/final/{sample}.variant_stats.tsv.gz",
                 "{OUTDIR}/{sample}/amulet/MultipletSummary.txt"
                 ], sample=samples['sample'], OUTDIR=OUTDIR)
 
-# Rule files
+# -- Rule files -- #
 include: "rules/cellranger.smk"
 include: "rules/qc.smk"
 include: "rules/mgatk.smk"

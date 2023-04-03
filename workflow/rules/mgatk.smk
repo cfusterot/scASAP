@@ -6,7 +6,7 @@ rule mgatk:
     params:
         bam="{OUTDIR}/{sample}/cellranger_count/outs/possorted_bam.bam"
     output:
-        ref="{OUTDIR}/{sample}/mgatk/final/chrM_refAllele.txt"
+        ref="{OUTDIR}/{sample}/mgatk/final/{sample}.variant_stats.tsv.gz"
     conda:
         "../envs/mgatk.yaml"
     threads: get_resource("mgatk", "threads")

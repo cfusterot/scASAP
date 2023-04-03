@@ -35,9 +35,8 @@ rule cellranger_count:
         {DATETIME} > {log.time} &&
         cellranger-atac count --id={wildcards.sample} \
         --reference={params.reference} \
-        --fastqs={input.fq} \
-        2> {log.err} > {log.out} &&
-        mv "{{wildcards.sample}}/*" "{OUTDIR}/{wildcards.sample}/cellranger_count" &&
-        touch "{OUTDIR}/{wildcards.sample}/cellranger_count/cellranger.finish"
+        --fastqs={input.fq} 2> {log.err} > {log.out}
+        mv {wildcards.sample}/* {OUTDIR}/{wildcards.sample}/cellranger_count
+        touch {OUTDIR}/{wildcards.sample}/cellranger_count/cellranger.finish
         {DATETIME} >> {log.time} 
         """

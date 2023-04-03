@@ -37,12 +37,9 @@ properties:
   cellranger:
     type: object
     properties:
-      path_to_outs:
-        type: string
       reference:
         type: string
     required:
-      - path_to_outs
       - reference
     
   mgatk:
