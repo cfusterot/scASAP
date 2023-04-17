@@ -1,4 +1,5 @@
 # scASAP: single-cell ATAC Sequencing Analysis Pipeline
+<img src="resources/img/scASAP-logo.png" width="100"> 
 
 [![Snakemake](https://img.shields.io/badge/snakemake-≥5.7.0-brightgreen.svg)](https://snakemake.bitbucket.io)
 [Pipeline status](https://github.com/cfusterot/scASAP/commits/master)
