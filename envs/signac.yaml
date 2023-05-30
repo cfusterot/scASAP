@@ -1,0 +1,16 @@
+name: signac
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconductor-biostrings
+  - bioconductor-bsgenome.hsapiens.ucsc.hg38 #bioconductor-bsgenome.mmusculus.ucsc.mm10
+  - r-dplyr
+  - bioconductor-ensdb.hsapiens.v86 #bioconductor-ensdb.mmusculus.v79
+  - r-foreach
+  - bioconductor-genomicranges
+  - r-ggplot2
+  - r-harmony
+  - r-signac
+  - r-seurat
+  - r-data.table
