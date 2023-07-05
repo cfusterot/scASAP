@@ -32,13 +32,29 @@ def get_resource(rule,resource):
     except KeyError:
         return config["resources"]["default"][resource]
 
+def get_integration_outs(wc):
+    file = expand("{OUTDIR}/{sample}/cellranger_count/outs/", sample = samples['sample'],OUTDIR=OUTDIR)
+    file = list(set(file))
+    return file
+
+def get_integration_mgatk(wc):
+    file = expand("{OUTDIR}/{sample}/mgatk/final/", sample = samples['sample'],OUTDIR=OUTDIR)
+    file = list(set(file))
+    return file
+
+def get_integration_amulet(wc):
+    file = expand("{OUTDIR}/{sample}/amulet/MultipletBarcodes_01.txt", sample = samples['sample'],OUTDIR=OUTDIR)
+    file = list(set(file))
+    return file
+
 # -- Final output -- #
 rule all:
     input:
         expand(["{OUTDIR}/{sample}/cellranger_count/cellranger.finish",
                 "{OUTDIR}/{sample}/qc/multiqc_report.html",
                 "{OUTDIR}/{sample}/mgatk/final/{sample}.variant_stats.tsv.gz",
-                "{OUTDIR}/{sample}/amulet/MultipletSummary.txt"
+                "{OUTDIR}/{sample}/amulet/MultipletSummary.txt",
+                "{OUTDIR}/signac/SeuratCombined_GeneScore.rds",
                 ], sample=samples['sample'], OUTDIR=OUTDIR)
 
 # -- Rule files -- #
@@ -46,4 +62,5 @@ include: "rules/cellranger.smk"
 include: "rules/qc.smk"
 include: "rules/mgatk.smk"
 include: "rules/amulet.smk"
+include: "rules/signac.smk"
 include: "rules/other.smk"

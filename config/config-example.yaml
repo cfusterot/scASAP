@@ -32,8 +32,25 @@ amulet:
 # --- d. (optional) Mitochondrial variant identification --- #
 mgatk:
    enable: TRUE 
+# --- e. (optional) Signac --- #
+signac:
+  enable: TRUE
+  qc:
+    min_peak_width: 20
+    max_peak_width: 10000
+    min_counts: 500
+    max_nucleosome_signal: 2
+    min_TSS: 2
+    min_peak_fragment: 1000
+    max_peak_fragment: 25000
+    min_percentage_peaks: 30
+  mito:
+    min_depth: 10
+    min_strand_cor: 0.65
+    min_cell_var: 5
+    min_VMR: 0.01
 
-# --- e. (optional) Genotyping with gotcha --- #
+# --- f. (optional) Genotyping with gotcha --- #
 gotcha:
   enable: TRUE
   whitelist: "/data/gpfs-1/users/cofu10_c/work/references/barcodes/737K-cratac-v1.txt"
@@ -69,6 +86,10 @@ resources:
         walltime: 1140
     amulet:
         threads: 4
+        mem_mb: 64000
+        walltime: 1140
+    signac:
+        threads: 2
         mem_mb: 64000
         walltime: 1140
     gotcha:

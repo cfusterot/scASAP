@@ -1,37 +1,36 @@
 import glob
 
-if config["signac"]["enabled"]:
+if config["signac"]["enable"]:
     rule signac:
         input:
-            h5="{}/{{sample}}/cellranger_count/outs/filtered_peak_bc_matrix.h5".format(OUTDIR),
-            fragpath="{}/{{sample}}/cellranger_count/outs/fragments.tsv.gz".format(OUTDIR), 
-            metadata="{}/{{sample}}/cellranger_count/outs/singlecell.csv".format(OUTDIR),
-            mgatk="{}/{{sample}}/mgatk/final/{{sample}}.variant_stats.tsv.gz".format(OUTDIR),
-            amulet="{}/{{sample}}/amulet/MultipletSummary.txt".format(OUTDIR)
+            outs = get_integration_outs, 
+            mgatk = get_integration_mgatk, 
+            amulet = get_integration_amulet
         output:
-            integrated="{}/{{sample}}/signac/integrated_preqc.rds".format(OUTDIR)
+            directory=expand("{OUTDIR}/signac", OUTDIR = OUTDIR),
+            integrated=expand("{OUTDIR}/signac/SeuratCombined_GeneScore.rds", OUTDIR = OUTDIR)
         conda:
             "../envs/signac.yaml"
         params:
-            min_peak_width=config['signac']['min_peak_width'],
-            max_peak_width=config['signac']['max_peak_width'],
-            min_counts=config['signac']['min_counts'],
-            max_nucleosome_signal=config['signac']['max_nucleosome_signal'],
-            min_TSS=config['signac']['min_TSS'],
-            min_peak_fragment=config['signac']['min_peak_fragment'],
-            max_peak_fragment=config['signac']['max_peak_fragment'],
-            min_percentage_peaks = config['signac']["min_percentage_peaks"],
+            min_peak_width=config['signac']['qc']['min_peak_width'],
+            max_peak_width=config['signac']['qc']['max_peak_width'],
+            min_counts=config['signac']['qc']['min_counts'],
+            max_nucleosome_signal=config['signac']['qc']['max_nucleosome_signal'],
+            min_TSS=config['signac']['qc']['min_TSS'],
+            min_peak_fragment=config['signac']['qc']['min_peak_fragment'],
+            max_peak_fragment=config['signac']['qc']['max_peak_fragment'],
+            min_percentage_peaks = config['signac']['qc']["min_percentage_peaks"],
             min_depth=config['signac']['mito']['min_depth'],
-            min_strand_cor=config['signac']['mgatk']['min_strand_cor'],
-            min_cell_var=config['signac']['mgatk']['min_cell_var'],
-            min_VMR=config['signac']['mgatk']['min_VMR']
+            min_strand_cor=config['signac']['mito']['min_strand_cor'],
+            min_cell_var=config['signac']['mito']['min_cell_var'],
+            min_VMR=config['signac']['mito']['min_VMR']
         threads: get_resource("signac", "threads")
         resources:
             mem_mb=get_resource("signac", "mem_mb"),
             walltime=get_resource("signac", "walltime")
         log:
-            err="{}/{{sample}}/signac.err".format(LOGDIR),
-            out="{}/{{sample}}/signac.out".format(LOGDIR)
+            err=expand("{LOGDIR}/signac/signac.err", LOGDIR = LOGDIR),
+            out=expand("{LOGDIR}/signac/signac.out", LOGDIR = LOGDIR)
         # Add here something 
         script:
             "../scripts/signac.R"

@@ -1,35 +1,32 @@
 #################################################################
 #                                                               #
 #           Integrated quality control and Peak Calling         #
-#               Adapted from Ambre Giguelay                     #
+#                  Adapted from Ambre Giguelay's script         #
+#                                by Coral Fustero-Torre         #
 #                                                               #
 #################################################################
-rm(list = ls())
 
 # -------- Load libraries -------- #
-library(Biostrings)
-library(BSgenome.Hsapiens.UCSC.hg38) #BSgenome.Mmusculus.UCSC.mm10
-library(dplyr)
-library(EnsDb.Hsapiens.v86) #for mm10
-library(foreach)
-library(GenomicRanges)
-library(ggplot2)
-library(harmony)
-library(Signac)
-library(Seurat)
-library(data.table)
+suppressMessages(library("Biostrings"))
+suppressMessages(library("BSgenome.Hsapiens.UCSC.hg38")) #BSgenome.Mmusculus.UCSC.mm10
+suppressMessages(library("dplyr"))
+suppressMessages(library("EnsDb.Hsapiens.v86")) #for mm10
+suppressMessages(library("foreach"))
+suppressMessages(library("GenomicRanges"))
+suppressMessages(library("ggplot2"))
+suppressMessages(library("harmony"))
+suppressMessages(library("Signac"))
+suppressMessages(library("Seurat"))
+suppressMessages(library("data.table"))
 
 # -------- Load functions -------- #
 message("Loading analysis functions")
-load("common_signac.R")
+source("scripts/common_signac.R")
 
 # -------- Folder configuration  -------- #
-# data_dir = paste0(snakemake@params[["out"]],"/Solo.out/Gene/raw")
-# dir.name = snakemake@params[["output_dir"]]
-#folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs", "6_traj_in", "7_func_analysis")
-# message("Folder paths were set.")
+#folders = c("qc", "mito", "visualisation")
 
-# -------- Read parameters -------- #
+# -------- Read parameters from config.yaml -------- #
 message("Loading parameters")
 min_peak_width = snakemake@params[["min_peak_width"]]
 max_peak_width = snakemake@params[["max_peak_width"]]
@@ -44,20 +41,26 @@ min_depth = snakemake@params[["min_depth"]]
 min_cell_var = snakemake@params[["min_cell_var"]]
 min_VMR = snakemake@params[["min_VMR"]]
 min_strand_cor = snakemake@params[["min_strand_cor"]]
-# -------- Run functions -------- #
 
+# -------- Set automatic parameters ------- #
+message("Loading sample files")
+
+outs = snakemake@input[["outs"]]
+mgatk = snakemake@input[["mgatk"]]
+amulet = snakemake@input[["amulet"]]
+dir_output = snakemake@output[["directory"]]
+outdir = strsplit(dir_output, "/signac")[[1]]
+samples.ID = unlist(sapply(strsplit(unlist(sapply(strsplit(outs, outdir), `[`, 2, simplify=FALSE)), "/cellranger_count/outs"), `[`, 1, simplify=FALSE))
+
+# -------- Run functions -------- #
 message("START:")
 message("Step1.- Computing set of common peaks")
-mylists = FindCommonPeaks_scATACseq(samples.ID = c("Spleen_4965", "Spleen_4961"),
+mylists = FindCommonPeaks_scATACseq(samples.ID = samples.ID,
                                     granges.ens = EnsDb.Hsapiens.v86,
                                     genome = "hg38",
-                                    dir.data.samples = 
-                                    setNames(c("/fast/work/groups/ag_ludwig/P3068_20230223/cellranger/CR-ATAC_mtscATAC_PolG_ko_spleen_4965_D4_212_hg38_v20-mtMask/outs/", "/fast/work/groups/ag_ludwig/P3068_20230223/cellranger/CR-ATAC_mtscATAC_PolG_wt_spleen_4961_C4_211_hg38_v20-mtMask/outs/"), 
-                                    c("Spleen_4965", "Spleen_4961")),
-                                    dir.output = "/fast/work/groups/ag_ludwig/PolGmice/Results/",
-                                    dir.mito = 
-                                    setNames(c("/fast/work/groups/ag_ludwig/P3068_20230223/mgatk/CR-ATAC_mtscATAC_PolG_ko_spleen_4965_D4_212_hg38_v20-mtMask/final/", "/fast/work/groups/ag_ludwig/P3068_20230223/mgatk/CR-ATAC_mtscATAC_PolG_wt_spleen_4961_C4_211_hg38_v20-mtMask/final/"), c("Spleen_4965", "Spleen_4961")), 
-                                    MaxPeakWidth = max_peak_width, # default: 10000
+                                    dir.data.samples = setNames(outs, samples.ID),
+                                    dir.output =dir_output,
+                                    dir.mito = setNames(mgatk, samples.ID), MaxPeakWidth = max_peak_width, # default: 10000
                                     MinPeakWidth = min_peak_width, # default: 20
                                     MinCounts = min_counts, #default: 500
                                     analysis.ID = "Batch1",
@@ -66,15 +69,13 @@ mylists = FindCommonPeaks_scATACseq(samples.ID = c("Spleen_4965", "Spleen_4961")
                                     name.rds = "SeuratObjectRaw", 
                                     mito = T)
 message("Step2.- Adding AMULET output to Signac object")
-mylists[["Doublets"]] = MakeDoubletList_scATACseq(samples.ID = c("Spleen_4965", "Spleen_4961"),
-                                                  dir.doublets = c("/fast/work/groups/ag_ludwig/P3068_20230223/amulet/D4/MultipletBarcodes_01.txt", 
-                                                  "/fast/work/groups/ag_ludwig/P3068_20230223/amulet/C4/MultipletBarcodes_01.txt"))
+mylists[["Doublets"]] = MakeDoubletList_scATACseq(samples.ID = samples.ID ,dir.doublets = amulet)
 
 message("Step2.- Saving filtered results")
 mylists[["Seurat"]] = lapply(names(mylists[["Seurat"]]), function(name) {FilterCells_scATACseq(seurat.obj = mylists[["Seurat"]][[name]],
                                                                                  samples.ID = name, 
                                                                                  analysis.ID = "Batch1",
-                                                                                 dir.output = "/fast/work/groups/ag_ludwig/PolGmice/Results/",
+                                                                                 dir.output = dir_output,
                                                                                  saveRDS = T, 
                                                                                  name.rds = "SeuratObjectFilter", 
                                                                                  doublets = mylists[["Doublets"]][[name]], 
@@ -93,7 +94,7 @@ mylists[["Variant"]] = lapply(names(mylists[["Seurat"]]), function(name) {IdentV
                                                                                   mgatk = mylists[["MGATK"]][[name]],
                                                                                   samples.ID = name,
                                                                                   analysis.ID = "Batch1",
-                                                                                  dir.output = "/fast/work/groups/ag_ludwig/PolGmice/Results/",
+                                                                                  dir.output = dir_output,
                                                                                   saveVariant = T,
                                                                                   MinCellVar = min_cell_var #default: 5
                                                                                   )})
@@ -104,7 +105,7 @@ message("Step4.- Computing Clonotypes")
 mylists[["Seurat"]] = lapply(names(mylists[["Seurat"]]), function(name) {FindClonotypes_scATACseq(seurat.obj = mylists[["Seurat"]][[name]], 
                                                                                       variable.sites = mylists[["Variant"]][[name]], 
                                                                                       samples.ID = name, 
-                                                                                      dir.output = "/fast/work/groups/ag_ludwig/PolGmice/Results/", 
+                                                                                      dir.output = dir_output, 
                                                                                       saveRDS = T, 
                                                                                       name.rds = "SeuratObjectClonotypes",
                                                                                       analysis.ID = "Batch1",
@@ -117,7 +118,7 @@ mylists[["Variant"]] = NULL
 
 message("Step5.- Merging final result")
 seurat.all = Merge_scATACseq(mylists[["Seurat"]], 
-                             dir.output = "/fast/work/groups/ag_ludwig/PolGmice/Results/", 
+                             dir.output = dir_output, 
                              saveRDS = T, 
                              name.rds = "SeuratCombined",
                              analysis.ID = "Batch1",
@@ -126,7 +127,7 @@ seurat.all = Merge_scATACseq(mylists[["Seurat"]],
 
 message("Step5.- Calculating Gene activity")
 seurat.all = GeneActivity_scATACseq(seurat.obj = seurat.all,
-                                    dir.output = "/fast/work/groups/ag_ludwig/PolGmice/Results/",
+                                    dir.output = dir_output,
                                     saveRDS = T, 
                                     name.rds = "SeuratCombined_GeneScore",
                                     analysis.ID = "Batch1")

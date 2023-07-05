@@ -1,15 +1,3 @@
-library(Biostrings)
-library(BSgenome.Hsapiens.UCSC.hg38) #BSgenome.Mmusculus.UCSC.mm10
-library(dplyr)
-library(EnsDb.Hsapiens.v86) #for mm10
-library(foreach)
-library(GenomicRanges)
-library(ggplot2)
-library(harmony)
-library(Signac)
-library(Seurat)
-library(data.table)
-
 
 QCplot = function(df, metric, name.ID, color, max.y = NULL){
   df$Metric = df[, metric]

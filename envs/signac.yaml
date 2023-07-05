@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
+  - libgfortran
   - bioconductor-biostrings
   - bioconductor-bsgenome.hsapiens.ucsc.hg38 #bioconductor-bsgenome.mmusculus.ucsc.mm10
   - r-dplyr
