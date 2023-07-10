@@ -5,6 +5,7 @@ channels:
 dependencies:
   - libgfortran
   - bioconductor-biostrings
+  - bioconductor-biovizbase
   - bioconductor-bsgenome.hsapiens.ucsc.hg38 #bioconductor-bsgenome.mmusculus.ucsc.mm10
   - r-dplyr
   - bioconductor-ensdb.hsapiens.v86 #bioconductor-ensdb.mmusculus.v79
