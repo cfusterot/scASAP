@@ -49,6 +49,11 @@ signac:
     min_strand_cor: 0.65
     min_cell_var: 5
     min_VMR: 0.01
+  annotation:
+    granges_ens: EnsDb.Hsapiens.v86 
+    genome: "hg38"
+  integrate_samples: TRUE
+  cores: 4
 
 # --- f. (optional) Genotyping with gotcha --- #
 gotcha:

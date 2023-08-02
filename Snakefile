@@ -54,7 +54,8 @@ rule all:
                 "{OUTDIR}/{sample}/qc/multiqc_report.html",
                 "{OUTDIR}/{sample}/mgatk/final/{sample}.variant_stats.tsv.gz",
                 "{OUTDIR}/{sample}/amulet/MultipletSummary.txt",
-                "{OUTDIR}/signac/SeuratCombined_GeneScore.rds",
+                #"{OUTDIR}/signac/SeuratCombined_GeneScore.rds",
+                "{OUTDIR}/signac/plots/vlnplot_qc_beforefiltering_ATAC.pdf"
                 ], sample=samples['sample'], OUTDIR=OUTDIR)
 
 # -- Rule files -- #
