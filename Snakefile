@@ -47,6 +47,10 @@ def get_integration_amulet(wc):
     file = list(set(file))
     return file
 
+# Create a rule that decides whether an integrated or merged object could be
+# the output. For instance: if harmony = TRUE and exists a merged.rds file;
+# then the output is mergedintegration.rds
+
 # -- Final output -- #
 rule all:
     input:
@@ -54,8 +58,7 @@ rule all:
                 "{OUTDIR}/{sample}/qc/multiqc_report.html",
                 "{OUTDIR}/{sample}/mgatk/final/{sample}.variant_stats.tsv.gz",
                 "{OUTDIR}/{sample}/amulet/MultipletSummary.txt",
-                #"{OUTDIR}/signac/SeuratCombined_GeneScore.rds",
-                "{OUTDIR}/signac/plots/vlnplot_qc_beforefiltering_ATAC.pdf"
+                "{OUTDIR}/signac/SeuratObject_Merge.rds"
                 ], sample=samples['sample'], OUTDIR=OUTDIR)
 
 # -- Rule files -- #

@@ -36,7 +36,7 @@ genome = snakemake@params[["genome"]]
 
 # -------- Load functions -------- #
 message("Loading analysis functions")
-source("scripts/step1_signac_functions.R")
+source("scripts/signac_common.R")
 
 # -------- Set automatic parameters ------- #
 message("Loading sample files")

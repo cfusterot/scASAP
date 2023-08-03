@@ -45,6 +45,7 @@ signac:
     max_peak_fragment: 25000
     min_percentage_peaks: 30
   mito:
+    enable: TRUE
     min_depth: 10
     min_strand_cor: 0.65
     min_cell_var: 5

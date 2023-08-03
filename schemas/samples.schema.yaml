@@ -7,6 +7,9 @@ properties:
   sample:
     type: string
     description: sample name/identifier
+  alias:
+    type: string
+    description: short sample name
   condition:
     type: string
     description: sample condition (i.e. WT, treated)
@@ -14,4 +17,5 @@ properties:
 # columns that the config/samples.tsv file must have to pass schema validation
 required:
   - sample
+  - alias
   - condition
