@@ -51,7 +51,7 @@ samples_ID = unlist(sapply(strsplit(unlist(sapply(strsplit(outs, outdir), `[`, 2
 message("START:")
 if(integration){
   FindCommonPeaks_scATACseq(MaxPeakWidth = max_peak_width, MinPeakWidth = min_peak_width,
-    dir.output = dir.output, dir.data.samples = outs)
+    dir.output = dir_output, dir.data.samples = outs)
 }
 
 gene_annotation = GetGRangesFromEnsDb(ensdb = granges_ens)
@@ -67,7 +67,7 @@ if(nb.cores > 1){
 
 meta = foreach(j = 1:nrow(samples), .packages = c("GenomicRanges", "Signac", "Seurat"), .combine = "rbind") %dopar% {
   CreateATACobject(sample.ID = samples_ID,
-                   dir.data.sample = samples[j, "Directory"],
+                   dir.data.sample = outs,
                    MinCounts = min_counts,
                    dir.output = dir_output,
                    gannotation = gene_annotation,

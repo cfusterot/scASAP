@@ -3,12 +3,11 @@ import glob
 if config["signac"]["enable"]:
     rule step1_signac:
         input:
-            outs=get_integration_outs, 
-            mgatk=get_integration_mgatk, 
-            amulet=get_integration_amulet
+            outs="{}/{{alias}}/cellranger_count/outs/".format(OUTDIR), 
+            mgatk="{}/{{alias}}/mgatk/final".format(OUTDIR), 
+            amulet="{}/{{alias}}/amulet/MultipletBarcodes_01.txt".format(OUTDIR)
         output:
-            directory=expand("{OUTDIR}/signac", OUTDIR = OUTDIR),
-            qc_plots=expand("{OUTDIR}/signac/plots/vlnplot_qc_beforefiltering_ATAC.pdf", OUTDIR = OUTDIR)
+            file="{}/{{alias}}/signac/SeuratObject_{{alias}}.rds".format(OUTDIR)
         conda:
             "../envs/signac.yaml"
         params: 
@@ -24,17 +23,17 @@ if config["signac"]["enable"]:
             mem_mb=get_resource("signac", "mem_mb"),
             walltime=get_resource("signac", "walltime")
         log:
-            err=expand("{LOGDIR}/signac/step1_signac.err", LOGDIR = LOGDIR),
-            out=expand("{LOGDIR}/signac/step1_signac.out", LOGDIR = LOGDIR)
+            err="{}/signac/{{alias}}/step1_signac.err".format(LOGDIR),
+            out="{}/signac/{{alias}}/step1_signac.out".format(LOGDIR)
         # Add here something 
         script:
             "../scripts/step1_qc.R"
 
     rule step2_signac:
         input:
-            seurat_in = expand("{OUTDIR}/signac/SeuratObject_{alias}.rds", OUTDIR=OUTDIR, alias=alias)
+            file = "{}/{{alias}}/signac/SeuratObject_{{alias}}.rds".format(OUTDIR)
         output:
-            seurat_out = expand("{OUTDIR}/signac/SeuratObject_{alias}.rds", OUTDIR=OUTDIR, alias=alias) 
+            file = "{}/{{alias}}/signac/SeuratObject_{{alias}}.s2.rds".format(OUTDIR)
         conda:
             "../envs/signac.yaml"
         params:
@@ -46,7 +45,7 @@ if config["signac"]["enable"]:
             min_percentage_peaks = config['signac']['qc']['min_percentage_peaks'], 
             max_nucleosome_signal = config['signac']['qc']['max_nucleosome_signal'],
             min_TSS = config['signac']['qc']['min_TSS'],
-            min_strand_cor = config['signac']['qc']['min_strand_cor'],
+            min_strand_cor = config['signac']['mito']['min_strand_cor'],
             min_VMR = config['signac']['mito']['min_VMR'],
             min_cell_var = config['signac']['mito']['min_cell_var'],
             min_depth = config['signac']['mito']['min_depth']
@@ -55,16 +54,16 @@ if config["signac"]["enable"]:
             mem_mb=get_resource("signac", "mem_mb"),
             walltime=get_resource("signac", "walltime")
         log:
-            err=expand("{LOGDIR}/signac/step2_signac.err", LOGDIR = LOGDIR),
-            out=expand("{LOGDIR}/signac/step2_signac.out", LOGDIR = LOGDIR)
+            err="{}/signac/{{alias}}_step2_signac.err".format(LOGDIR),
+            out="{}/signac/{{alias}}_step2_signac.out".format(LOGDIR)
         script:
             "../scripts/step2_mitoassay.R"
 
     rule step3_signac:
         input:
-            seurat_in = expand("{OUTDIR}/signac/SeuratObject_{alias}.rds", OUTDIR=OUTDIR, alias=alias)
+            seurat_in = "{}/{{alias}}/signac/SeuratObject_{{alias}}.s2.rds".format(OUTDIR)
         output:
-            seurat_out = expand("{OUTDIR}/signac/SeuratObject_{condition}.rds", OUTDIR=OUTDIR, condition=condition)
+            seurat_out = "{}/{{alias}}/signac/SeuratObjectBis_{{alias}}.rds".format(OUTDIR)
         conda:
             "../envs/signac.yaml"
         params:
@@ -74,21 +73,21 @@ if config["signac"]["enable"]:
         threads: get_resource("signac", "threads")
         resources:
         log:
-            err=expand("{LOGDIR}/signac/step2_signac.err", LOGDIR = LOGDIR),
-            out=expand("{LOGDIR}/signac/step2_signac.out", LOGDIR = LOGDIR)
+            err="{}/signac/{{alias}}_step2_signac.err".format(LOGDIR),
+            out="{}/signac/{{alias}}_step2_signac.out".format(LOGDIR)
         script:
             "../scripts/step3_findclonotypes.R"
 
     rule step4_signac:
         input:
-            seurat_out = expand("{OUTDIR}/signac/SeuratObject_{condition}.rds", OUTDIR=OUTDIR, condition=condition)
+            get_step3_output
         output:
-            expand("{OUTDIR}/signac/SeuratObject_Merge.rds", OUTDIR = OUTDIR)
+            "{}/integration/SeuratObject_Merge.rds".format(OUTDIR)
         conda:
             "../envs/signac.yaml"
         params:
            cores = config['signac']['cores'],
-           harmony = config['signac']['harmony'],
+           harmony = config['signac']['harmony']['enable'],
            lambdaHarmony = config['signac']['harmony']['lambda'],
            GEX = config['signac']['GEX'],
            RmCompo = config['signac']['clustering']['remove_first_component'],
@@ -97,9 +96,9 @@ if config["signac"]["enable"]:
            MinDistUMAP = config['signac']['clustering']['min.dist'],
            AlgoClustering = config['signac']['clustering']['algorithm'],
            ResolutionClustering = config['signac']['clustering']['resolution'],
-           batch_corr = config['signac']['clustering']['batch_correction'],
-           var.batch  = config['signac']['clustering']['batch_correction']['variable_to_regress'],
-           nb.cores = config['signac']['cores']
+           batch_corr = config['signac']['batch_correction']['enable'],
+           var_batch  = config['signac']['batch_correction']['variable_to_regress'],
+           nb_cores = config['signac']['cores']
         threads: get_resource("signac", "threads")
         resources:
         log:

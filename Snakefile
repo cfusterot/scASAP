@@ -33,17 +33,27 @@ def get_resource(rule,resource):
         return config["resources"]["default"][resource]
 
 def get_integration_outs(wc):
-    file = expand("{OUTDIR}/{sample}/cellranger_count/outs/", sample = samples['sample'],OUTDIR=OUTDIR)
+    file = expand("{OUTDIR}/{alias}/cellranger_count/outs/", sample = samples['alias'], OUTDIR=OUTDIR)
     file = list(set(file))
     return file
 
 def get_integration_mgatk(wc):
-    file = expand("{OUTDIR}/{sample}/mgatk/final/", sample = samples['sample'],OUTDIR=OUTDIR)
+    file = expand("{OUTDIR}/{alias}/mgatk/final/", sample = samples['alias'], OUTDIR=OUTDIR)
     file = list(set(file))
     return file
 
 def get_integration_amulet(wc):
-    file = expand("{OUTDIR}/{sample}/amulet/MultipletBarcodes_01.txt", sample = samples['sample'],OUTDIR=OUTDIR)
+    file = expand("{OUTDIR}/{alias}/amulet/MultipletBarcodes_01.txt", alias = samples['alias'],OUTDIR=OUTDIR)
+    file = list(set(file))
+    return file
+
+def get_step1_output(wc):
+    file = expand("{OUTDIR}/{alias}/signac/SeutatObject_{alias}.rds", OUTDIR = OUTDIR, alias=samples['alias'])
+    file = list(set(file))
+    return file
+
+def get_step3_output(wc):
+    file = expand("{OUTDIR}/{alias}/signac/SeuratObjectBis_{alias}.rds", OUTDIR=OUTDIR, alias=samples['alias'])
     file = list(set(file))
     return file
 
@@ -58,7 +68,7 @@ rule all:
                 "{OUTDIR}/{sample}/qc/multiqc_report.html",
                 "{OUTDIR}/{sample}/mgatk/final/{sample}.variant_stats.tsv.gz",
                 "{OUTDIR}/{sample}/amulet/MultipletSummary.txt",
-                "{OUTDIR}/signac/SeuratObject_Merge.rds"
+                "{OUTDIR}/integration/SeuratObject_Merge.rds"
                 ], sample=samples['sample'], OUTDIR=OUTDIR)
 
 # -- Rule files -- #
