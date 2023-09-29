@@ -1,7 +1,5 @@
 RmCompo#################################################################
 #                                                               #
-#                Profiling of PolG mice tissues                 #          
-#                                                               #
 #                           STEP 4:                             #
 #                       Merge samples                           #
 #                                                               #
@@ -25,7 +23,6 @@ source("scripts/signac_common.R")
 
 # -------- Read parameters from config.yaml -------- #
 dir.output = ""
-nb_cores = snakemake@params[['nb_cores']]
 name.grp = "sample"
 GEX = snakemake@params[['GEX']]
 harmony = snakemake@params[['harmony']]

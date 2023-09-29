@@ -8,7 +8,8 @@
 #################################################################
 #################################################################
 #                                                               #
-#                  21.07.2023 - Ambre Giguelay                  #
+#                       Created by Ambre Giguelay               #
+#    Adapted for snakemake by Coral Fustero-Torre               #
 #                                                               #
 #################################################################
 rm(list = ls())
@@ -25,7 +26,6 @@ source("scripts/signac_common.R")
 
 # -------- Read parameters from config.yaml -------- #
 dir.output = snakemake@output[["directory"]]
-nb.cores = snakemake@params['cores']
 name.ID = "sample"
 fc.resolution = snakemake@params['fc_resolution']
 fc.k = snakemake@params['fc_k']
@@ -34,15 +34,6 @@ fc.k = snakemake@params['fc_k']
 samples = read.table("config/samples.tsv", header = T)
 
 # -------- Run functions -------- #
-if(nb.cores > 1){
-  cl <- parallel::makeCluster(nb.cores)
-  doParallel::registerDoParallel(cl)
-} else {
-  registerDoSEQ()
-}
-
-options(future.globals.maxSize = 8000 * 1024^2) #To avoid error message with large datasets
-
 foreach(grp = rev(unique(samples$condition)), .packages = c("Seurat", "Signac", "stringr")) %dopar%{
   samples.grp = samples[samples$condition == grp,]$alias
   
@@ -70,6 +61,3 @@ foreach(grp = rev(unique(samples$condition)), .packages = c("Seurat", "Signac", 
   
 }
 
-if(nb.cores > 1){
-  parallel::stopCluster(cl)
-}

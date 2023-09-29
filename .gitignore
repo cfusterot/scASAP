@@ -1,5 +1,6 @@
 .ipynb_checkpoints/
 .snakemake/
+.DS_Store
 out
 log
 slurm-*.out
