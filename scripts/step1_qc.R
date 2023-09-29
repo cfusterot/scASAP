@@ -49,41 +49,23 @@ samples_ID = unlist(sapply(strsplit(unlist(sapply(strsplit(outs, outdir), `[`, 2
 
 # -------- Run functions -------- #
 message("START:")
-if(integration){
-  FindCommonPeaks_scATACseq(MaxPeakWidth = max_peak_width, MinPeakWidth = min_peak_width,
-    dir.output = dir_output, dir.data.samples = outs)
-}
-
 gene_annotation = GetGRangesFromEnsDb(ensdb = granges_ens)
 gene_annotation = renameSeqlevels(gene_annotation, mapSeqlevels(seqlevels(gene_annotation), "UCSC"))
 genome(gene_annotation) = genome
 
-if(nb.cores > 1){
-    cl <- parallel::makeCluster(nb_cores)
-  doParallel::registerDoParallel(cl)
-} else {
-    registerDoSEQ()
-}
-
-meta = foreach(j = 1:nrow(samples), .packages = c("GenomicRanges", "Signac", "Seurat"), .combine = "rbind") %dopar% {
-  CreateATACobject(sample.ID = samples_ID,
+message(paste0("Creating ATAC object for sample: ", samples_ID))
+CreateATACobject(sample.ID = samples_ID,
                    dir.data.sample = outs,
                    MinCounts = min_counts,
                    dir.output = dir_output,
                    gannotation = gene_annotation,
                    name.ID = "sample")
-}
-
-if(nb.cores > 1){
-  parallel::stopCluster(cl)
-}
 
 cols = setNames(c("#006600", "#006666", "#99CC99", "#CCCC33"), c('pct_reads_in_peaks', 'peak_region_fragments', 'TSS.enrichment', 'nucleosome_signal'))
 dir.create(paste0(outdir, "plots/"))
 
+message("Generating basic QC plots")
 pdf(paste0(dir.output, "/plots/vlnplot_qc_beforeFiltering_ATAC.pdf"), width = (1+1.3*nrow(samples)), height = 4)
-sapply(names(cols), function(x) {
-         print(QCplot(df = meta, metric = x, color = cols[x], n.samples = nrow(samples), max.y = NULL, name.ID = name.ID))
-})
+QCplot(df = meta, metric = x, color = cols[x], n.samples = nrow(samples), max.y = NULL, name.ID = name.ID)
 dev.off()
 
