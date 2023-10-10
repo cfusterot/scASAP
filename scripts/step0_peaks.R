@@ -26,7 +26,7 @@ source("scripts/signac_common.R")
 # -------- Set automatic parameters ------- #
 message("Loading sample files")
 outs = snakemake@input[["outs"]]
-dir_output = snakemake@output[["directory"]]
+dir_output = snakemake@params[["directory"]]
 outdir = strsplit(dir_output, "/signac")[[1]]
 samples_ID = unlist(sapply(strsplit(unlist(sapply(strsplit(outs, outdir), `[`, 2, simplify=FALSE)), "/cellranger_count/outs"), `[`, 1, simplify=FALSE))
 

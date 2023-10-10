@@ -7,22 +7,31 @@
 #################################################################
 
 # -------- Load libraries -------- #
-granges_ens = snakemake@params[["granges_ens"]]
-if (grepl("Hsapiens", ranges, fixed = TRUE){
-  message("Loading EnsDb.Hsapiens.v86")
-  suppressMessages(library("EnsDb.Hsapiens.v86"))
-} else if (grepl("Mmusculus", ranges, fixed = TRUE)) {
-  message("Loading EnsDB.Mmusculus.v79")
-  suppressMessages(library("EnsDb.Mmusculus.v79"))
-} else {
-  message("Species not found.")
-}
+message("Loading libraries")
 suppressMessages(library("dplyr"))
 suppressMessages(library("foreach"))
 suppressMessages(library("GenomicRanges"))
 suppressMessages(library("ggplot2"))
 suppressMessages(library("Signac"))
 suppressMessages(library("Seurat"))
+
+message("Loading genome")
+granges_ens = snakemake@params[["granges_ens"]]
+genome = snakemake@params[["genome"]] 
+if (grepl("Hsapiens", granges_ens, fixed = TRUE)){
+  message("Loading EnsDb.Hsapiens.v86")
+  suppressMessages(library("EnsDb.Hsapiens.v86"))
+  gene_annotation = GetGRangesFromEnsDb(ensdb = EnsDb.Hsapiens.v86)
+  gene_annotation = renameSeqlevels(gene_annotation, mapSeqlevels(seqlevels(gene_annotation), "UCSC"))
+  genome(gene_annotation) = genome
+} else if (grepl("Mmusculus", granges_ens, fixed = TRUE)) {
+  message("Loading EnsDB.Mmusculus.v79")
+  suppressMessages(library("EnsDb.Mmusculus.v79"))
+  gene_annotation = GetGRangesFromEnsDb(ensdb = EnsDb.Mmusculus.v79)
+  gene_annotation = renameSeqlevels(gene_annotation, mapSeqlevels(seqlevels(gene_annotation), "UCSC"))
+} else {
+    message("Species not found.")
+}
 
 # -------- Read parameters from config.yaml -------- #
 message("Loading parameters")
@@ -31,7 +40,6 @@ max_peak_width = snakemake@params[["max_peak_width"]]
 min_counts = snakemake@params[["min_counts"]]
 integration = snakemake@params[["integration"]] 
 nb_cores = snakemake@params[["nb_cores"]]
-granges_ens = snakemake@params[["granges_ens"]] 
 genome = snakemake@params[["genome"]]
 
 # -------- Load functions -------- #
@@ -43,16 +51,13 @@ message("Loading sample files")
 outs = snakemake@input[["outs"]]
 mgatk = snakemake@input[["mgatk"]]
 amulet = snakemake@input[["amulet"]]
-dir_output = snakemake@output[["directory"]]
+dir_output = snakemake@params[["directory"]]
 outdir = strsplit(dir_output, "/signac")[[1]]
-samples_ID = unlist(sapply(strsplit(unlist(sapply(strsplit(outs, outdir), `[`, 2, simplify=FALSE)), "/cellranger_count/outs"), `[`, 1, simplify=FALSE))
+samples_ID = snakemake@params[["sample_ID"]]
+#samples_ID = unlist(sapply(strsplit(unlist(sapply(strsplit(outs, outdir), `[`, 2, simplify=FALSE)), "/cellranger_count/outs"), `[`, 1, simplify=FALSE))
 
 # -------- Run functions -------- #
 message("START:")
-gene_annotation = GetGRangesFromEnsDb(ensdb = granges_ens)
-gene_annotation = renameSeqlevels(gene_annotation, mapSeqlevels(seqlevels(gene_annotation), "UCSC"))
-genome(gene_annotation) = genome
-
 message(paste0("Creating ATAC object for sample: ", samples_ID))
 CreateATACobject(sample.ID = samples_ID,
                    dir.data.sample = outs,

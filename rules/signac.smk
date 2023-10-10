@@ -1,16 +1,42 @@
 import glob
 
 if config["signac"]["enable"]:
+    if config["signac"]["integrate_samples"]:
+        rule step0_peaks:
+            input:
+                get_common_peaks
+            output:
+                peaks="{}/integration/CommonSetOfPeaks.bed".format(OUTDIR)
+            conda:
+                "../envs/signac.yaml"
+            params:
+                directory=directory("{}/integration/").format(OUTDIR),
+                min_peak_width=config['signac']['qc']['min_peak_width'],
+                max_peak_width=config['signac']['qc']['max_peak_width']
+            threads:  get_resource("signac", "threads")
+            resources:
+                mem_mb=get_resource("signac", "mem_mb"),
+                walltime=get_resource("signac", "walltime")
+            log:
+                err="{}/signac/step0_peaks.err".format(LOGDIR),
+                out="{}/signac/step0_peaks.out".format(LOGDIR)
+            script:
+                "../scripts/step0_peaks.R"
+    
     rule step1_signac:
         input:
-            outs="{}/{{alias}}/cellranger_count/outs/".format(OUTDIR), 
-            mgatk="{}/{{alias}}/mgatk/final".format(OUTDIR), 
-            amulet="{}/{{alias}}/amulet/MultipletBarcodes_01.txt".format(OUTDIR)
+            peaks="{}/integration/CommonSetOfPeaks.bed".format(OUTDIR),
+            out="{}/{{sample}}/cellranger_count/cellranger.finish".format(OUTDIR),
+            mgatk="{}/{{sample}}/mgatk/final/{{sample}}.variant_stats.tsv.gz".format(OUTDIR),
+            amulet="{}/{{sample}}/amulet/MultipletSummary.txt".format(OUTDIR)
         output:
-            file="{}/{{alias}}/signac/SeuratObject_{{alias}}.rds".format(OUTDIR)
+            file="{}/{{sample}}/signac/SeuratObject_{{sample}}.rds".format(OUTDIR)
         conda:
             "../envs/signac.yaml"
         params: 
+            sample_ID="{{sample}}",
+            directory=directory("{}/{{sample}}/signac/").format(OUTDIR),
+            mgatk_dir=directory("{}/{{sample}}/mgatk/final/").format(OUTDIR),
             min_peak_width=config['signac']['qc']['min_peak_width'],
             max_peak_width=config['signac']['qc']['max_peak_width'],
             min_counts=config['signac']['qc']['min_counts'],
@@ -23,8 +49,8 @@ if config["signac"]["enable"]:
             mem_mb=get_resource("signac", "mem_mb"),
             walltime=get_resource("signac", "walltime")
         log:
-            err="{}/signac/{{alias}}/step1_signac.err".format(LOGDIR),
-            out="{}/signac/{{alias}}/step1_signac.out".format(LOGDIR)
+            err="{}/signac/{{sample}}/step1_signac.err".format(LOGDIR),
+            out="{}/signac/{{sample}}/step1_signac.out".format(LOGDIR)
         # Add here something 
         script:
             "../scripts/step1_qc.R"

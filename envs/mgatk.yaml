@@ -8,8 +8,11 @@ dependencies:
   - r-data.table
   - bioconductor-summarizedexperiment
   - bioconductor-genomicranges
-  - python=3.6   # or 2.7
+  - python=3.7   # or 2.7
+  - pip
   - pip:
-    - mgatk
+    - click
+    - dataclasses
     - pyyaml
     - matplotlib
+    - mgatk

@@ -112,7 +112,7 @@ Filter_ATAC = function(seurat, minPeakFrag, maxPeakFrag, minPercPeak, maxNucleoS
   seurat = subset(seurat, subset = pct_reads_in_peaks >= minPercPeak & peak_region_fragments >= minPeakFrag & peak_region_fragments < maxPeakFrag &
                    TSS.enrichment >= minTSS & nucleosome_signal < maxNucleoSig)
   return(seurat)
-
+}
 
 # --- 5. Add_MGATK --- #
 # Parameter list:
