@@ -17,3 +17,14 @@ dependencies:
   - r-signac
   - r-seurat
   - r-data.table
+  - libgfortran
+  - r-uwot=0.1.11
+  - bioconductor-summarizedexperiment
+  - r-matrix
+  - r-cowplot
+  - r-dt
+  - r-details
+  - r-seuratdisk
+  - r-rmarkdown
+  - bioconductor-glmgampoi
+  - r-sessioninfo

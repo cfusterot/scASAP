@@ -58,15 +58,22 @@ def get_step3_output(wc):
 # then the output is mergedintegration.rds
 
 # -- Final output -- #
+def signac_output(wc):
+    if config["signac"]["enable"]:
+        file = expand("{OUTDIR}/{sample}/signac/SeuratObject_{sample}.rds", sample=samples['sample'],OUTDIR=OUTDIR)    
+    if config["signac"]["individual_analysis"]:
+        file = expand("{OUTDIR}/{sample}/signac/01_preprocessing_{sample}.html", sample=samples['sample'],OUTDIR=OUTDIR)
+    return file
+
 rule all:
     input:
         expand(["{OUTDIR}/{sample}/cellranger_count/cellranger.finish",
                 "{OUTDIR}/{sample}/qc/multiqc_report.html",
                 "{OUTDIR}/{sample}/mgatk/final/{sample}.variant_stats.tsv.gz",
                 "{OUTDIR}/{sample}/amulet/MultipletSummary.txt",
-                "{OUTDIR}/{sample}/signac/SeuratObject_{sample}.rds"
-                #"{OUTDIR}/{sample}/signac/SeuratObject_Merge.rds"
-                ], sample=samples['sample'], OUTDIR=OUTDIR)
+                "{OUTDIR}/{sample}/signac/01_preprocessing_{sample}.html"
+                ], sample=samples['sample'], OUTDIR=OUTDIR),
+        signac_output
 
 # -- Rule files -- #
 include: "rules/cellranger.smk"

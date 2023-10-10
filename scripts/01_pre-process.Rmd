@@ -1,0 +1,394 @@
+---
+title: "01 Data pre-processing"
+author: "Developed by Yu-Hsin Josch Hsieh. Adapted by Coral Fustero-Torre"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    code_folding: hide
+params:
+  sample: sample_id
+  outs: ""
+  directory: ""
+  reference: ""
+  haplogroup: ""
+  ncount_atac_max: ""
+  ncount_atac_min: ""
+  nuclesome_signal: ""
+  tss_enrichment: ""
+  percent_mt: ""
+  min_depth: ""
+  n_cells_conf_detected: ""
+  strand_correlation: ""
+  min_cell_var: ""
+---
+
+### START
+```{r setup, include=TRUE}
+# Set up knitr parameters
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load packages and genome annotation
+
+```{r packages, message=FALSE, warning=FALSE}
+suppressMessages(library(Seurat))
+suppressMessages(library(Signac))
+suppressMessages(library(EnsDb.Hsapiens.v86))
+suppressMessages(library(BSgenome.Hsapiens.UCSC.hg38))
+suppressMessages(library(SummarizedExperiment))
+suppressMessages(library(ggplot2))
+suppressMessages(library(Matrix))
+suppressMessages(library(dplyr))
+suppressMessages(library(cowplot))
+suppressMessages(library(sessioninfo))
+# other called packages SeuratDisk, details and DT
+set.seed(123)
+'%ni%' <- Negate('%in%')
+suppressWarnings(annotations <- GetGRangesFromEnsDb(ensdb = EnsDb.Hsapiens.v86))
+annotations = renameSeqlevels(annotations, mapSeqlevels(seqlevels(annotations), "UCSC"))
+genome(annotations) = "hg38"
+```
+
+## Setup the Seurat Object: `r params$sample`
+
+```{r create seurat object, message=FALSE, warning=FALSE}
+# the 10x hdf5 file contains both data types. 
+  fragpath <- file.path(params$outs, 'atac_fragments.tsv.gz')
+ # create ATAC assay and add it to the object
+  pbmc <- CreateChromatinAssay(
+  assay = "ATAC",
+  counts = counts$Peaks,
+  sep = c(":", "-"),
+  fragments = fragpath,
+  annotation = annotations)
+
+  pbmc
+```
+
+## Cellranger cell calling 
+```{r , message=FALSE, warning=FALSE}
+metadata <- metadata %>% 
+  arrange(desc(atac_peak_region_fragments)) %>%
+  mutate(rank_ATAC = 1:dim(metadata)[1],
+         is_cell = ifelse(is_cell == 1 & excluded_reason == 0, "Cells", "Non-cells")) %>% 
+  arrange(desc(gex_umis_count)) %>%
+  mutate(rank_GEX = 1:dim(metadata)[1])
+```
+
+**ATAC barcode rank plot**
+```{r ATAC rank plot, fig.width=6, fig.height=5, message=FALSE, warning=FALSE}
+metadata %>%
+  ggplot(aes(x = log10(rank_ATAC), y = log10(atac_peak_region_fragments), col = factor(is_cell, levels = c("Non-cells", "Cells")))) + geom_line() +
+  scale_y_continuous(breaks = 1:4, labels = c(10, 100, 1000, "10K"), expand = c(0, 0), limits = c(0, 5)) + 
+  scale_x_continuous(breaks = c(2, 4, log10(20000), log10(50000), 5), labels = c(100, "10k", "20","50", "100K"), expand = c(0, 0), limits = c(0, 5.5)) + 
+  scale_color_manual(values = c("blue2", "goldenrod2")) +
+  theme_bw() + xlab("Barcodes") + ylab("Fragments Overlapping Peaks") +
+  theme(legend.title=element_blank())
+```
+
+**The distribution of the number of ATAC fragments per cell**
+```{r Fragment plot, fig.width=6, fig.height=5, message=FALSE, warning=FALSE}
+metadata %>%
+  ggplot(aes(x = atac_peak_region_fragments)) + 
+  # geom_density(aes(y = stat(density) * 12000, col = factor(is_cell, levels = c("Non-cells", "Cells"))), alpha = 0.6, adjust = 3) +   
+  geom_histogram(aes(fill = factor(is_cell, levels = c("Non-cells", "Cells"))),binwidth =0.05, alpha = 0.6, position = 'identity') +
+  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = c("1", "10", 100, "1k", "10K", "100k"),
+                limits = c(1, 1e5), expand = c(0,0)) + 
+  scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = c("1", "10", 100, "1k", "10K", "100k"),
+                limits = c(1, 1e5), expand = c(0,0)) +
+  scale_fill_manual(values = c("blue2", "goldenrod2")) +
+  scale_color_manual(values = c("blue2", "goldenrod2")) +
+  theme_bw() + xlab("Fragments Per Barcode") + ylab("Barcodes") +
+  theme(legend.title=element_blank())
+```
+
+## Quality Control
+The following QC metrics are determined and visualized: (1) Nucleosome banding pattern, (2) Transcriptional start site (TSS) enrichment score, (3) Total number of fragments in peaks, (4) Fraction of fragments in peaks and (5) mitochondrial DNA depth.
+
+```{r QC, message=FALSE, warning=FALSE}
+# nucleus genome ATAC QC
+DefaultAssay(pbmc) <- "ATAC"
+pbmc <- NucleosomeSignal(pbmc)
+pbmc <- TSSEnrichment(pbmc)
+mtDepth <- read.table(file.path(params$directory, params$sample,"mgatk/final",paste0(params$sample, ".depthTable.txt")), header = FALSE, row.names = 1) 
+pbmc$mtDNA_depth <- mtDepth[Cells(pbmc),]
+
+```
+
+**QC visualization**
+```{r QC plot, fig.width=6, fig.height=6, fig.fullwidth=TRUE}
+# visulize QC metrics 
+VlnPlot(
+    object = pbmc,
+    features = c("nCount_ATAC", "TSS.enrichment", "nucleosome_signal", "mtDNA_depth"),
+    ncol = 4,
+    pt.size = 0)
+```
+
+### QC filtering
+
+The following parameter were used to remove low quality cells : (1) peaks counts less than 1000 or more than 25,000. (2) RNA counts less than 1000 or more than 20,000. (3) nucleosome signal more than 2, (4) TSS enrichment score less than 3, and (5) mitochondrial reads more than 10%.
+
+```{r Filtering, message=FALSE, warning=FALSE}
+# filter out low quality cells
+pbmc <- subset(
+  x = pbmc,
+  subset = nCount_ATAC < params$ncount_atac_max &
+    nCount_ATAC > params$ncount_atac_min &
+    nucleosome_signal < params$nuclesome_signal &
+    TSS.enrichment > params$tss_enrichment &
+)
+
+pbmc
+```
+
+**QC visualization after filtering**
+```{r fQC plot, fig.width=6, fig.height=6, fig.fullwidth=TRUE}
+par(mar = c(4, 4, .1, .2))
+# visulize QC metrics 
+VlnPlot(
+    object = pbmc,
+    features = c("nCount_ATAC", "TSS.enrichment", "nucleosome_signal", "mtDNA_depth"),
+    ncol = 3,
+    pt.size = 0)
+```
+
+## ATAC data processing
+```{r ATAC data processing, message=FALSE, warning=FALSE, results='hide'}
+# ATAC: latent semantic indexing (LSI)
+DefaultAssay(pbmc) <- "ATAC"
+pbmc <- FindTopFeatures(pbmc, min.cutoff = 5)
+pbmc <- RunTFIDF(pbmc) %>% RunSVD() %>% 
+        RunUMAP(reduction = 'lsi', dims = 2:50, reduction.name = "atac.umap", reduction.key = "atacUMAP_")
+```
+
+## Seurat v4 Reference Mapping
+```{r Reference mapping, message=FALSE, warning=FALSE}
+## reference:https://satijalab.org/seurat/articles/multimodal_reference_mapping
+
+library(SeuratDisk)
+
+# load PBMC reference
+
+LabelTransfer <- function(SO){
+ pbmc.cite <- LoadH5Seurat(params$reference)
+ DefaultAssay(SO) <- "SCT"
+# transfer cell type labels from reference to query
+anchors <- FindTransferAnchors(
+    reference = pbmc.cite,
+    query = SO,
+    normalization.method = "SCT",
+    reference.reduction = "spca",
+    dims = 1:50
+  )
+
+anchors <- FindTransferAnchors(
+    reference = pbmc.cite,
+    query = SO,
+    normalization.method = "SCT",
+    reference.reduction = "spca",
+    dims = 1:50
+  )
+  
+  mapped_SO <- MapQuery(
+    anchorset = anchors,
+    query = SO,
+    reference = pbmc.cite,
+    refdata = list(
+      celltype.l1 = "celltype.l1",
+      celltype.l2 = "celltype.l2"),
+    reference.reduction = "spca", 
+    reduction.model = "wnn.umap"
+  )
+
+  SO$predicted.celltype.l1 <- mapped_SO$predicted.celltype.l1
+  SO$predicted.celltype.l2 <- mapped_SO$predicted.celltype.l2
+  SO <- AddMetaData(SO, mapped_SO@reductions$ref.umap@cell.embeddings, col.name = c("refUMAP_1", "refUMAP_2"))
+  return(SO)
+}
+
+pbmc <- LabelTransfer(pbmc)
+```
+
+```{r refUMAP plot, fig.width=5, fig.height=5}
+p <- FeatureScatter(pbmc,feature1 = "refUMAP_1", feature2 = "refUMAP_2", group.by = "predicted.celltype.l2", pt.size = 0.1) + 
+        NoLegend() + ggtitle(NULL)
+LabelClusters(p, id = "colors")
+```
+
+## Weighted Nearest Neighbor Analysis
+```{r WNN analysis, message=FALSE, warning=FALSE, results='hide'}
+pbmc <- FindMultiModalNeighbors(pbmc, reduction.list = list("pca", "lsi"), dims.list = list(1:50, 2:50))
+pbmc <- RunUMAP(pbmc, nn.name = "weighted.nn", reduction.name = "wnn.umap", reduction.key = "wnnUMAP_")
+pbmc <- FindClusters(pbmc, graph.name = "wsnn", algorithm = 3, verbose = FALSE)
+```
+
+**The modality weights**
+```{r WNN weights, fig.width=8, fig.height=4}
+ VlnPlot(pbmc, features = "SCT.weight", group.by = 'predicted.celltype.l2', sort = TRUE, pt.size = 0.01) +
+  NoLegend()
+```
+
+**Visualize clustering based on each modality**
+```{r modality UMAP plot, fig.width=5, fig.height=5}
+DimPlot(pbmc, reduction = "atac.umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 2.5, repel = TRUE) + NoLegend() + ggtitle("ATAC")
+DimPlot(pbmc, reduction = "wnn.umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 2.5, repel = TRUE) + ggtitle("WNN") + NoLegend()
+
+```
+
+# Doublet removal 
+Doublet were identified using two computational frameworks: AMULET (based on ATAC) and Scrubelt (based on GEX)
+```{r, fig.width=5, fig.height=5}
+## amulet
+  multiplets <- read.table(file.path(params$directory, params$sample,"amulet", "MultipletBarcodes_01.txt")) %>% t() %>% as.vector() #/MultipletCellIds_01.txt
+  multiplet.metadata <- rep("singlet", length(Cells(pbmc)))
+  names(multiplet.metadata) <- Cells(pbmc)
+  multiplet.metadata[multiplets] <- "multiplet"
+  pbmc$multiplet_amulet <- multiplet.metadata
+  
+  DimPlot(pbmc, group.by = "multiplet_amulet", pt.size = 1, 
+        cols = c("singlet" = "grey", "multiplet" = "purple"), 
+        order = c("multiplet", "singlet"), reduction = "wnn.umap")
+  
+  pbmc <- subset(pbmc, multiplet_amulet == "singlet") # & multiplet_scrubelt == "singlet")
+ pbmc
+ 
+```
+
+```{r, include=FALSE}
+# save RDS file
+saveRDS(pbmc, file.path(params$directory, params$sample, "signac", paste0(params$sample, "_Seurat.rds")))
+
+celltype <- data.frame(predicted.celltype.l2 = pbmc$predicted.celltype.l2,
+           refUMAP_1 = pbmc$refUMAP_1,  refUMAP_2 = pbmc$refUMAP_2)
+
+write.csv(celltype, file.path(params$directory, params$sample, "signac", paste0(params$sample, "_pred.celltype.l2.csv" )))
+```
+
+# Mitochondrial DNA variant calling
+Given the multiome dataset in general have lower mtDNA depth, the filtering is less stringent (mtDNA_depth \> 5). 
+Variant (germline and somatic) were identify by selecting variant with high strand concordance (\> 0.65), error-prone variants were excluded (301A\>C, 302A\>C, 310T\>C, and 316G\>C).
+
+**mtDNA depth by cell type**
+```{r, fig.width=8, fig.height=4}
+VlnPlot(pbmc, "mtDNA_depth", group.by = "predicted.celltype.l2", pt.size = 0.1) + NoLegend() + scale_y_log10() + geom_hline(yintercept=5)
+```
+
+```{r, message=FALSE, warning=FALSE, results='hide', eval=FALSE, echo = FALSE}
+range <- pbmc@assays$ATAC@ranges
+range <- range[grepl("^chr[0-9]*$",seqnames(range))]
+range <- range[order(seqnames(range))]
+
+pbmc$mtDNA_copy <- (pbmc$mtDNA_depth *2 *sum(range@ranges@width))/(16000*pbmc$nCount_ATAC)
+
+VlnPlot(pbmc, "mtDNA_copy", group.by = "predicted.celltype.l2", pt.size = 0) + NoLegend() + scale_y_log10()
+```
+
+**mtDNA coverage**
+```{r, message=FALSE, warning=FALSE, results='hide'}
+pbmc <- subset(pbmc, mtDNA_depth > min_depth)
+mito <- readRDS(file.path(params$directory, params$sample, "mgatk", "final", paste0(params$sample, ".rds")))
+mito <- mito[,Cells(pbmc)]
+```
+
+```{r mtDNA Coverage plot, message=FALSE, warning=FALSE, fig.width=6, fig.height=4}
+pull_coverage <- function(SE, resolution = 5){
+  zoo::rollmean(rowMeans(assays(SE)[['coverage']]), resolution)
+}
+
+cov_df <- data.frame(
+  pos = zoo::rollmean(1:16569, 5),
+  cov = pull_coverage(mito))
+
+# visualize coverage
+cov_df %>% reshape2::melt(id.vars = "pos") %>% # dplyr::filter(value > 5) %>%
+  ggplot(aes(x = pos, y = value)) +
+  geom_line() + theme_classic() +
+  scale_x_continuous(breaks = seq(0,16596, by = 2500), expand = c(0,0)) +
+  labs(x = "Position on mtDNA chromosome", y = "Roll mean coverage") 
+
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+source("../scripts/variant_calling.R")
+suppressWarnings(mmat <- call_mutations_mgatk(mito))
+VariantPlot(
+  as.data.frame(rowData(mmat)),
+  min.cells = 1,
+  concordance.threshold = 0.65,
+  vmr.threshold = 0.01
+)
+
+  var <- as.data.frame(rowData(mmat))
+  var <- var %>% subset(n_cells_conf_detected >= params$n_cells_conf_detected &
+                          strand_correlation > params$strand_correlation &
+                          # vmr >= vmr.thres &
+                          variant %ni% c("301A>C", "302A>C", "310T>C", "316G>C")) %>% pull(variant)
+  mmat <- mmat[var,]
+
+```
+
+```{r, include=FALSE}
+# save RDS file
+saveRDS(mmat, file.path(params$directory, params$sample, "signac", paste0(params$sample, "_mmat.rds" )))
+```
+
+**Mitochondrial variant pseduobulk heteroplasmy rank plot**
+
+The plot below shows the rank pseduobulk heteroplasmy, and the variants with more than pseduobulk heteroplasmy 5% were labeled. Homoplasmic variants were removed by filtering out variant with variant-mean ratio less than 0.01.
+```{r, message=FALSE, warning=FALSE, fig.width=4, fig.height=4}
+mtVAR.meta <- as.data.frame(rowData(mmat))
+mtVAR.meta %>% filter(vmr >= 0.01) %>% 
+  arrange(desc(mean)) %>% mutate(rank = 1:n()) %>% 
+  mutate(label = ifelse(mean > 0.05, variant, NA)) %>% 
+  ggplot(aes(x = rank, y = mean*100, label=label)) +
+  geom_point() + theme_classic() + ggrepel::geom_label_repel() +
+  labs(x = "Rank ordered mutations", y = "pseduobulk heteroplasmy (%)") 
+```
+
+**List of homoplasmic variant**
+```{r}
+mtVAR.meta %>% filter(vmr < 0.01) %>% arrange(position) %>%
+  DT::datatable(rownames=FALSE, 
+                extensions = 'Buttons', 
+                options = list(dom='frtBip', buttons = c('csv')))
+```
+
+```{r, message=FALSE, warning=FALSE}
+homoVar <- mtVAR.meta %>% filter(vmr < 0.01 & mean > 0.9) %>% arrange(position) %>% pull(variant)
+if(file.exists(haplogroup)){
+  haplo_data <- data.table::fread(haplogroup)
+  M.VAR <- c("489T>C", "15043G>A", "10400C>T", "14783T>C", "15301G>A")
+  L.VAR <- c("10398A>G", "12705C>T", "16223C>T", "8701A>G", "9540T>C","10873T>C")
+  N.VAR <- c("15326A>G", "8860A>G", "750A>G", "4769A>G", "263A>G", "1438A>G", "7028C>T", "2706A>G", "11719G>A", "14766C>T", "73A>G", "16519C")
+  Macro_haplogroup <- ifelse(sum(homoVar %in% M.VAR) > 2, "M_Asian",
+                    ifelse(sum(homoVar %in% L.VAR) > 2, "L_Africa", 
+                    ifelse(sum(homoVar %in% N.VAR) > 2, "N_Eurasian", "Wrong")))
+  uncommon <- homoVar[homoVar %ni% haplo_data$variant]
+  # Lineage L ("Africa n"): L0, L1, L2, L3, L4, L5, L6
+  # Lineage M ("Asian"): C, D, E, G, M, Q, Z
+  # Lineage N ("Eurasian"): A, B, F, H, HV, I, J, K, N, O, P, R, S, T, U, V, W, X, Y
+
+  print(paste(params$sample, "most likely belong to macro-haplogroup", Macro_haplogroup))
+  if(length(uncommon) > 0){print(paste("After removing haplogroup-marker variants, the following non-haplogroup variant(s) are also homoplasmic:", paste(uncommon,collapse=', ')))}
+}
+```
+
+**List of high-confident heteroplasmic variant**
+```{r}
+mtVAR.meta %>% filter(vmr >= 0.01, n_cells_conf_detected >= params$n_cells_conf_detected) %>% arrange(desc(mean)) %>%
+  DT::datatable(rownames=FALSE, 
+                extensions = 'Buttons', 
+                options = list(dom='frtBip', buttons = c('csv')))
+```
+
+```{r}
+sessioninfo::session_info() %>%
+  details::details(
+    summary = 'Current session info',
+    open    = TRUE
+  )
+```
