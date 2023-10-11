@@ -144,7 +144,8 @@ if config["signac"]["enable"]:
                 "../envs/signac.yaml"
             params: 
                 directory = expand("{OUTDIR}/", OUTDIR = OUTDIR),
-                reference = config['signac']['annotation']['reference'],
+                reference_rna = config['signac']['annotation']['reference_rna'],
+                reference_rna_ext = config['signac']['annotation']['reference_rna_ext'],
                 haplogroup = config['signac']['annotation']['haplogroup'],
                 ncount_atac_max = config['signac']['qc']['max_counts'],
                 ncount_atac_min = config['signac']['qc']['min_counts'],

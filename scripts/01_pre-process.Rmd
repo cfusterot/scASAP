@@ -9,7 +9,8 @@ params:
   sample: sample_id
   outs: ""
   directory: ""
-  reference: ""
+  ref_rna_ext: ""
+  ref_rna: ""
   haplogroup: ""
   ncount_atac_max: ""
   ncount_atac_min: ""
@@ -44,7 +45,8 @@ suppressMessages(library(sessioninfo))
 # other called packages SeuratDisk, details and DT
 set.seed(123)
 '%ni%' <- Negate('%in%')
-suppressWarnings(annotations <- GetGRangesFromEnsDb(ensdb = EnsDb.Hsapiens.v86))
+
+annotations = GetGRangesFromEnsDb(ensdb = EnsDb.Hsapiens.v86)
 annotations = renameSeqlevels(annotations, mapSeqlevels(seqlevels(annotations), "UCSC"))
 genome(annotations) = "hg38"
 ```
@@ -53,32 +55,27 @@ genome(annotations) = "hg38"
 
 ```{r create seurat object, message=FALSE, warning=FALSE}
 # the 10x hdf5 file contains both data types. 
-  fragpath <- file.path(params$outs, 'atac_fragments.tsv.gz')
- # create ATAC assay and add it to the object
-  pbmc <- CreateChromatinAssay(
-  assay = "ATAC",
-  counts = counts$Peaks,
-  sep = c(":", "-"),
-  fragments = fragpath,
-  annotation = annotations)
+counts <- Read10X_h5(filename = file.path(params$outs,"filtered_peak_bc_matrix.h5"))
+fragpath <- file.path(params$outs, "fragments.tsv.gz")
+metadata <- read.csv(file= file.path(params$outs, "singlecell.csv"), header = TRUE, row.names = 1)
+# create ATAC assay and add it to the object
+pbmc <- CreateChromatinAssay(counts = counts, sep = c(":", "-"), fragments = fragpath, annotation = annotations)
+pbmc <- CreateSeuratObject(counts = pbmc, assay = 'ATAC', meta.data = metadata)
 
-  pbmc
+pbmc
 ```
 
 ## Cellranger cell calling 
 ```{r , message=FALSE, warning=FALSE}
-metadata <- metadata %>% 
-  arrange(desc(atac_peak_region_fragments)) %>%
+metadata <- metadata %>% arrange(desc(peak_region_fragments)) %>%
   mutate(rank_ATAC = 1:dim(metadata)[1],
-         is_cell = ifelse(is_cell == 1 & excluded_reason == 0, "Cells", "Non-cells")) %>% 
-  arrange(desc(gex_umis_count)) %>%
-  mutate(rank_GEX = 1:dim(metadata)[1])
+         is_cell = ifelse(is__cell_barcode == 1 & excluded_reason == 0, "Cells", "Non-cells"))
 ```
 
 **ATAC barcode rank plot**
 ```{r ATAC rank plot, fig.width=6, fig.height=5, message=FALSE, warning=FALSE}
-metadata %>%
-  ggplot(aes(x = log10(rank_ATAC), y = log10(atac_peak_region_fragments), col = factor(is_cell, levels = c("Non-cells", "Cells")))) + geom_line() +
+metadata %>% ggplot(aes(x = log10(rank_ATAC), y = log10(peak_region_fragments), col = factor(is_cell, levels = c("Non-cells", "Cells")))) + 
+  geom_line() +
   scale_y_continuous(breaks = 1:4, labels = c(10, 100, 1000, "10K"), expand = c(0, 0), limits = c(0, 5)) + 
   scale_x_continuous(breaks = c(2, 4, log10(20000), log10(50000), 5), labels = c(100, "10k", "20","50", "100K"), expand = c(0, 0), limits = c(0, 5.5)) + 
   scale_color_manual(values = c("blue2", "goldenrod2")) +
@@ -88,16 +85,10 @@ metadata %>%
 
 **The distribution of the number of ATAC fragments per cell**
 ```{r Fragment plot, fig.width=6, fig.height=5, message=FALSE, warning=FALSE}
-metadata %>%
-  ggplot(aes(x = atac_peak_region_fragments)) + 
-  # geom_density(aes(y = stat(density) * 12000, col = factor(is_cell, levels = c("Non-cells", "Cells"))), alpha = 0.6, adjust = 3) +   
-  geom_histogram(aes(fill = factor(is_cell, levels = c("Non-cells", "Cells"))),binwidth =0.05, alpha = 0.6, position = 'identity') +
-  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
-                labels = c("1", "10", 100, "1k", "10K", "100k"),
-                limits = c(1, 1e5), expand = c(0,0)) + 
-  scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
-                labels = c("1", "10", 100, "1k", "10K", "100k"),
-                limits = c(1, 1e5), expand = c(0,0)) +
+metadata %>% ggplot(aes(x = peak_region_fragments)) + 
+  geom_histogram(aes(fill = factor(is_cell, levels = c("Non-cells", "Cells"))), binwidth = 0.05, alpha = 0.6, position = 'identity') +
+  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x), labels = c("1", "10", 100, "1k", "10K", "100k"), limits = c(1, 1e5), expand = c(0,0)) + 
+  scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x), labels = c("1", "10", 100, "1k", "10K", "100k"), limits = c(1, 1e5), expand = c(0,0)) +
   scale_fill_manual(values = c("blue2", "goldenrod2")) +
   scale_color_manual(values = c("blue2", "goldenrod2")) +
   theme_bw() + xlab("Fragments Per Barcode") + ylab("Barcodes") +
@@ -138,7 +129,7 @@ pbmc <- subset(
   subset = nCount_ATAC < params$ncount_atac_max &
     nCount_ATAC > params$ncount_atac_min &
     nucleosome_signal < params$nuclesome_signal &
-    TSS.enrichment > params$tss_enrichment &
+    TSS.enrichment > params$tss_enrichment
 )
 
 pbmc
@@ -172,44 +163,28 @@ library(SeuratDisk)
 
 # load PBMC reference
 
-LabelTransfer <- function(SO){
- pbmc.cite <- LoadH5Seurat(params$reference)
- DefaultAssay(SO) <- "SCT"
-# transfer cell type labels from reference to query
-anchors <- FindTransferAnchors(
-    reference = pbmc.cite,
-    query = SO,
-    normalization.method = "SCT",
-    reference.reduction = "spca",
-    dims = 1:50
-  )
-
-anchors <- FindTransferAnchors(
-    reference = pbmc.cite,
-    query = SO,
-    normalization.method = "SCT",
-    reference.reduction = "spca",
-    dims = 1:50
-  )
+BridgeTransfer <- function(SO){
+  message("Reading reference files")
+  obj.rna.ext <- readRDS(params$ref_rna_ext)
+  obj.rna <- LoadH5Seurat(params$ref_rna) 
   
-  mapped_SO <- MapQuery(
-    anchorset = anchors,
-    query = SO,
-    reference = pbmc.cite,
-    refdata = list(
-      celltype.l1 = "celltype.l1",
-      celltype.l2 = "celltype.l2"),
-    reference.reduction = "spca", 
-    reduction.model = "wnn.umap"
-  )
+  message("Finding Bridge Transfer anchors")
+  bridge.anchor <- FindBridgeTransferAnchors(extended.reference = obj.rna.ext, query = SO, reduction = "lsiproject", dims = 2:50)
+  Misc(obj.rna[["wnn.umap"]], slot="model")$num_precomputed_nns <- 1
 
+  message("Mapping query")
+  mapped_SO <- MapQuery(anchorset = bridge.anchor, reference = obj.rna, query = SO, 
+                   refdata = list(celltype.l1 = "celltype.l1", celltype.l2 = "celltype.l2", celltype.l3 = "celltype.l3"),
+                   reduction.model = "wnn.umap")
+  
   SO$predicted.celltype.l1 <- mapped_SO$predicted.celltype.l1
   SO$predicted.celltype.l2 <- mapped_SO$predicted.celltype.l2
+  # SO$predicted.celltype.l3 <- mapped_SO$predicted.celltype.l3
   SO <- AddMetaData(SO, mapped_SO@reductions$ref.umap@cell.embeddings, col.name = c("refUMAP_1", "refUMAP_2"))
   return(SO)
 }
 
-pbmc <- LabelTransfer(pbmc)
+pbmc <- BridgeTransfer(pbmc)
 ```
 
 ```{r refUMAP plot, fig.width=5, fig.height=5}

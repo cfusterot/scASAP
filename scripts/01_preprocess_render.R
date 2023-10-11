@@ -5,8 +5,10 @@ directory = snakemake@params$directory
 print(directory)
 sample_id = unlist(sapply(strsplit(unlist(sapply(strsplit(outs, directory),`[`, 2, simplify=FALSE)), "/cellranger_count/outs"), `[`, 1, simplify=FALSE))
 print(sample_id)
-reference = snakemake@params$reference
-print(reference)
+ref_rna = snakemake@params$reference_rna
+print(ref_rna)
+ref_rna_ext = snakemake@params$reference_rna_ext
+print(ref_rna_ext)
 ncount_atac_max = snakemake@params$ncount_atac_max
 print(ncount_atac_max)
 ncount_atac_min = snakemake@params$ncount_atac_min
@@ -32,7 +34,8 @@ message("Rendering analysis report: 01 sample pre-processing")
   params = list(sample = sample_id, 
                 outs = outs, 
                 directory = directory,
-                reference = reference, 
+                ref_rna = ref_rna,
+                ref_rna_ext = ref_rna_ext,
                 ncount_atac_max = ncount_atac_max, 
                 ncount_atac_min = ncount_atac_min, 
                 nuclesome_signal = nuclesome_signal, 
