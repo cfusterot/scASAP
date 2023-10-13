@@ -27,4 +27,5 @@ dependencies:
   - r-seuratdisk
   - r-rmarkdown
   - bioconductor-glmgampoi
+  - r-remotes
   - r-sessioninfo

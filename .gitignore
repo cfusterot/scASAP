@@ -1,6 +1,8 @@
 .ipynb_checkpoints/
 .snakemake/
 .DS_Store
+.RData
+.Rhistory
 out
 log
 slurm-*.out

@@ -9,8 +9,7 @@ params:
   sample: sample_id
   outs: ""
   directory: ""
-  ref_rna_ext: ""
-  ref_rna: ""
+  reference: ""
   haplogroup: ""
   ncount_atac_max: ""
   ncount_atac_min: ""
@@ -32,6 +31,11 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Load packages and genome annotation
 
 ```{r packages, message=FALSE, warning=FALSE}
+## Install necessary packages
+#install.packages("resources/seurat", repos=NULL, type="source")
+#install.packages("resources/seurat-data", repos=NULL, type="source")
+#install.packages("resources/azimuth", repos=NULL, type="source")
+
 suppressMessages(library(Seurat))
 suppressMessages(library(Signac))
 suppressMessages(library(EnsDb.Hsapiens.v86))
@@ -42,7 +46,12 @@ suppressMessages(library(Matrix))
 suppressMessages(library(dplyr))
 suppressMessages(library(cowplot))
 suppressMessages(library(sessioninfo))
-# other called packages SeuratDisk, details and DT
+suppressMessages(library(SeuratDisk))
+#suppressMessages(library(Azimuth))
+#suppressMessages(library(SeuratData))
+options(Seurat.object.assay.version = "v5")
+#remotes::install_github("satijalab/azimuth", "seurat5", quiet = TRUE, upgrade= "never", force = TRUE)
+#remotes::install_github("satijalab/seurat", "feat/dictionary", upgrade = "never", quiet = TRUE, force = TRUE)
 set.seed(123)
 '%ni%' <- Negate('%in%')
 
@@ -155,64 +164,6 @@ pbmc <- RunTFIDF(pbmc) %>% RunSVD() %>%
         RunUMAP(reduction = 'lsi', dims = 2:50, reduction.name = "atac.umap", reduction.key = "atacUMAP_")
 ```
 
-## Seurat v4 Reference Mapping
-```{r Reference mapping, message=FALSE, warning=FALSE}
-## reference:https://satijalab.org/seurat/articles/multimodal_reference_mapping
-
-library(SeuratDisk)
-
-# load PBMC reference
-
-BridgeTransfer <- function(SO){
-  message("Reading reference files")
-  obj.rna.ext <- readRDS(params$ref_rna_ext)
-  obj.rna <- LoadH5Seurat(params$ref_rna) 
-  
-  message("Finding Bridge Transfer anchors")
-  bridge.anchor <- FindBridgeTransferAnchors(extended.reference = obj.rna.ext, query = SO, reduction = "lsiproject", dims = 2:50)
-  Misc(obj.rna[["wnn.umap"]], slot="model")$num_precomputed_nns <- 1
-
-  message("Mapping query")
-  mapped_SO <- MapQuery(anchorset = bridge.anchor, reference = obj.rna, query = SO, 
-                   refdata = list(celltype.l1 = "celltype.l1", celltype.l2 = "celltype.l2", celltype.l3 = "celltype.l3"),
-                   reduction.model = "wnn.umap")
-  
-  SO$predicted.celltype.l1 <- mapped_SO$predicted.celltype.l1
-  SO$predicted.celltype.l2 <- mapped_SO$predicted.celltype.l2
-  # SO$predicted.celltype.l3 <- mapped_SO$predicted.celltype.l3
-  SO <- AddMetaData(SO, mapped_SO@reductions$ref.umap@cell.embeddings, col.name = c("refUMAP_1", "refUMAP_2"))
-  return(SO)
-}
-
-pbmc <- BridgeTransfer(pbmc)
-```
-
-```{r refUMAP plot, fig.width=5, fig.height=5}
-p <- FeatureScatter(pbmc,feature1 = "refUMAP_1", feature2 = "refUMAP_2", group.by = "predicted.celltype.l2", pt.size = 0.1) + 
-        NoLegend() + ggtitle(NULL)
-LabelClusters(p, id = "colors")
-```
-
-## Weighted Nearest Neighbor Analysis
-```{r WNN analysis, message=FALSE, warning=FALSE, results='hide'}
-pbmc <- FindMultiModalNeighbors(pbmc, reduction.list = list("pca", "lsi"), dims.list = list(1:50, 2:50))
-pbmc <- RunUMAP(pbmc, nn.name = "weighted.nn", reduction.name = "wnn.umap", reduction.key = "wnnUMAP_")
-pbmc <- FindClusters(pbmc, graph.name = "wsnn", algorithm = 3, verbose = FALSE)
-```
-
-**The modality weights**
-```{r WNN weights, fig.width=8, fig.height=4}
- VlnPlot(pbmc, features = "SCT.weight", group.by = 'predicted.celltype.l2', sort = TRUE, pt.size = 0.01) +
-  NoLegend()
-```
-
-**Visualize clustering based on each modality**
-```{r modality UMAP plot, fig.width=5, fig.height=5}
-DimPlot(pbmc, reduction = "atac.umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 2.5, repel = TRUE) + NoLegend() + ggtitle("ATAC")
-DimPlot(pbmc, reduction = "wnn.umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 2.5, repel = TRUE) + ggtitle("WNN") + NoLegend()
-
-```
-
 # Doublet removal 
 Doublet were identified using two computational frameworks: AMULET (based on ATAC) and Scrubelt (based on GEX)
 ```{r, fig.width=5, fig.height=5}
@@ -225,7 +176,7 @@ Doublet were identified using two computational frameworks: AMULET (based on ATA
   
   DimPlot(pbmc, group.by = "multiplet_amulet", pt.size = 1, 
         cols = c("singlet" = "grey", "multiplet" = "purple"), 
-        order = c("multiplet", "singlet"), reduction = "wnn.umap")
+        order = c("multiplet", "singlet"), reduction = "atac.umap")
   
   pbmc <- subset(pbmc, multiplet_amulet == "singlet") # & multiplet_scrubelt == "singlet")
  pbmc
@@ -236,20 +187,12 @@ Doublet were identified using two computational frameworks: AMULET (based on ATA
 # save RDS file
 saveRDS(pbmc, file.path(params$directory, params$sample, "signac", paste0(params$sample, "_Seurat.rds")))
 
-celltype <- data.frame(predicted.celltype.l2 = pbmc$predicted.celltype.l2,
-           refUMAP_1 = pbmc$refUMAP_1,  refUMAP_2 = pbmc$refUMAP_2)
-
-write.csv(celltype, file.path(params$directory, params$sample, "signac", paste0(params$sample, "_pred.celltype.l2.csv" )))
 ```
 
 # Mitochondrial DNA variant calling
 Given the multiome dataset in general have lower mtDNA depth, the filtering is less stringent (mtDNA_depth \> 5). 
 Variant (germline and somatic) were identify by selecting variant with high strand concordance (\> 0.65), error-prone variants were excluded (301A\>C, 302A\>C, 310T\>C, and 316G\>C).
 
-**mtDNA depth by cell type**
-```{r, fig.width=8, fig.height=4}
-VlnPlot(pbmc, "mtDNA_depth", group.by = "predicted.celltype.l2", pt.size = 0.1) + NoLegend() + scale_y_log10() + geom_hline(yintercept=5)
-```
 
 ```{r, message=FALSE, warning=FALSE, results='hide', eval=FALSE, echo = FALSE}
 range <- pbmc@assays$ATAC@ranges
@@ -258,7 +201,6 @@ range <- range[order(seqnames(range))]
 
 pbmc$mtDNA_copy <- (pbmc$mtDNA_depth *2 *sum(range@ranges@width))/(16000*pbmc$nCount_ATAC)
 
-VlnPlot(pbmc, "mtDNA_copy", group.by = "predicted.celltype.l2", pt.size = 0) + NoLegend() + scale_y_log10()
 ```
 
 **mtDNA coverage**
