@@ -1,31 +1,31 @@
-name: signac
+me: signac
 channels:
-  - conda-forge
-  - bioconda
+    - conda-forge
+    - bioconda
 dependencies:
-  - numpy
-  - libgfortran
-  - bioconductor-biostrings
-  - bioconductor-biovizbase
-  - bioconductor-bsgenome.hsapiens.ucsc.hg38 #bioconductor-bsgenome.mmusculus.ucsc.mm10
-  - r-dplyr
-  - bioconductor-ensdb.hsapiens.v86 #bioconductor-ensdb.mmusculus.v79
-  - r-foreach
-  - bioconductor-genomicranges
-  - r-ggplot2
-  - r-harmony
-  - r-signac
-  - r-seurat
-  - r-data.table
-  - libgfortran
-  - r-uwot=0.1.11
-  - bioconductor-summarizedexperiment
-  - r-matrix
-  - r-cowplot
-  - r-dt
-  - r-details
-  - r-seuratdisk
-  - r-rmarkdown
-  - bioconductor-glmgampoi
-  - r-remotes
-  - r-sessioninfo
+    - numpy
+    - libgfortran
+    - bioconductor-biostrings
+    - bioconductor-biovizbase
+    - bioconductor-bsgenome.hsapiens.ucsc.hg38 #bioconductor-bsgenome.mmusculus.ucsc.mm10                    
+    - r-dplyr
+    - bioconductor-ensdb.hsapiens.v86 #bioconductor-ensdb.mmusculus.v79
+    - r-foreach
+    - bioconductor-genomicranges
+    - r-ggplot2
+    - r-harmony
+    - r-signac
+    - r-seurat                                                   
+    - r-data.table
+    - libgfortran                                 
+    - r-uwot=0.1.11
+    - bioconductor-summarizedexperiment
+    - r-matrix
+    - r-cowplot
+    - r-dt
+    - r-details
+    - r-seuratdisk
+    - r-rmarkdown
+    - bioconductor-glmgampoi
+    - r-remotes
+    - r-sessioninfo
