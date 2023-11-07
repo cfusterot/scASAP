@@ -4,12 +4,13 @@ if config["signac"]["enable"]:
     if config["signac"]["integrate_samples"]:
         rule step0_peaks:
             input:
-                get_common_peaks
+                get_cellranger_finish
             output:
                 peaks="{}/integration/CommonSetOfPeaks.bed".format(OUTDIR)
             conda:
                 "../envs/signac.yaml"
             params:
+                input_files=get_common_peaks,
                 directory=directory("{}/integration/").format(OUTDIR),
                 min_peak_width=config['signac']['qc']['min_peak_width'],
                 max_peak_width=config['signac']['qc']['max_peak_width']
@@ -26,7 +27,6 @@ if config["signac"]["enable"]:
         rule step1_signac:
             input:
                 peaks="{}/integration/CommonSetOfPeaks.bed".format(OUTDIR),
-                out="{}/{{sample}}/cellranger_count/cellranger.finish".format(OUTDIR),
                 mgatk="{}/{{sample}}/mgatk/final/{{sample}}.variant_stats.tsv.gz".format(OUTDIR),
                 amulet="{}/{{sample}}/amulet/MultipletSummary.txt".format(OUTDIR)
             output:
@@ -135,14 +135,16 @@ if config["signac"]["enable"]:
     if config["signac"]["individual_analysis"]:
         rule step1_preprocess:
             input:
-                outs="{}/{{sample}}/cellranger_count/outs/".format(OUTDIR), 
-                mgatk="{}/{{sample}}/mgatk/final".format(OUTDIR), 
-                amulet="{}/{{sample}}/amulet/MultipletBarcodes_01.txt".format(OUTDIR)
+                outs="{}/{{sample}}/cellranger_count/cellranger.finish".format(OUTDIR), 
+                mgatk="{}/{{sample}}/mgatk/final/{{sample}}.variant_stats.tsv.gz".format(OUTDIR), 
+                amulet="{}/{{sample}}/amulet/MultipletSummary.txt".format(OUTDIR)
             output:
                 report="{}/{{sample}}/signac/01_preprocessing_{{sample}}.html".format(OUTDIR)
             conda:
                 "../envs/signac.yaml"
             params: 
+                mgatk="{}/{{sample}}/mgatk/final/".format(OUTDIR),
+                outs="{}/{{sample}}/cellranger_count/outs".format(OUTDIR),
                 directory = expand("{OUTDIR}/", OUTDIR = OUTDIR),
                 reference = config['signac']['annotation']['reference'],
                 haplogroup = config['signac']['annotation']['haplogroup'],

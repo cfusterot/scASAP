@@ -1,5 +1,5 @@
 # Snakemake params 
-outs = snakemake@input$outs
+outs = snakemake@params$outs
 print(outs)
 directory = snakemake@params$directory
 print(directory)

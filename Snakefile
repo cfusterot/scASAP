@@ -37,6 +37,11 @@ def get_common_peaks(wc):
     file = list(set(file))
     return file
 
+def get_cellranger_finish(wc):
+    file = expand("{OUTDIR}/{sample}/cellranger_count/cellranger.finish", sample = samples['sample'], OUTDIR=OUTDIR)
+    file = list(set(file))
+    return file
+
 def get_integration_mgatk(wc):
     file = expand("{OUTDIR}/{sample}/mgatk/final/", sample = samples['sample'], OUTDIR=OUTDIR)
     file = list(set(file))
