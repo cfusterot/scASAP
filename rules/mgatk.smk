@@ -18,10 +18,11 @@ rule mgatk:
         out="{}/{{sample}}/mgatk.out".format(LOGDIR)
     shell:
         """
+        # delete folder if exists
+        rm -f -R {OUTDIR}/{wildcards.sample}/mgatk
         # common error resolved by those two export commands
         export LC_ALL=C.UTF-8
         export LANG=C.UTF-8
         # run mgatk command
-        mgatk tenx -i {params.bam} -n {wildcards.sample} -o {OUTDIR}/{wildcards.sample}/mgatk/ \
-        -bt CB -b {OUTDIR}/{wildcards.sample}/cellranger_count/outs/filtered_peak_bc_matrix/barcodes.tsv 
+        mgatk tenx -i {params.bam} -n {wildcards.sample} -o {OUTDIR}/{wildcards.sample}/mgatk/ -bt CB -b {OUTDIR}/{wildcards.sample}/cellranger_count/outs/filtered_peak_bc_matrix/barcodes.tsv 
         """

@@ -26,9 +26,16 @@ source("scripts/signac_common.R")
 # -------- Set automatic parameters ------- #
 message("Loading sample files")
 outs = snakemake@params[["input_files"]]
+message("outs:")
+print(outs)
 dir_output = snakemake@params[["directory"]]
-outdir = strsplit(dir_output, "/signac")[[1]]
+message("dir_output:")
+print(dir_output)
+outdir = strsplit(dir_output, "integration/")[[1]]
+message("outdir:")
+print(outdir)
 samples_ID = unlist(sapply(strsplit(unlist(sapply(strsplit(outs, outdir), `[`, 2, simplify=FALSE)), "/cellranger_count/outs"), `[`, 1, simplify=FALSE))
+print(samples_ID)
 
 # -------- Run functions -------- #
 message("Generating common set of peaks for all samples:")

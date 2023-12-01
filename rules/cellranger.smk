@@ -17,7 +17,7 @@ rule cellranger_count:
     input:
         fq=lambda wc: units["fqs"][wc.sample]
     output:
-        finish="{}/{{sample}}/cellranger_count/cellranger.finish".format(OUTDIR)
+        finish="{}/{{sample}}/cellranger.finish".format(LOGDIR)
     params:    
         reference=config['cellranger']['reference']
     envmodules:
@@ -29,15 +29,28 @@ rule cellranger_count:
     log:
         err="{}/{{sample}}/cellranger.err".format(LOGDIR),
         out="{}/{{sample}}/cellranger.out".format(LOGDIR),
-        time="{}/{{sample}}/cellranger.time".format(LOGDIR)
     shell:
         """
-        {DATETIME} > {log.time} &&
-        cellranger-atac count --id={wildcards.sample} \
-        --reference={params.reference} \
-        --fastqs={input.fq} 2> {log.err} > {log.out}
-        mv {wildcards.sample}/* {OUTDIR}/{wildcards.sample}/cellranger_count
-        touch {OUTDIR}/{wildcards.sample}/cellranger_count/cellranger.finish
-        rm -r {wildcards.sample}
-        {DATETIME} >> {log.time} 
+        cellranger-atac count --id={wildcards.sample} --reference={params.reference} --fastqs={input.fq} 2> {log.err} > {log.out}
+        {DATETIME} >> {output.finish} 
         """
+
+rule cellranger_mv:
+    input:
+        log="{}/{{sample}}/cellranger.finish".format(LOGDIR)
+    output:
+        finish="{}/{{sample}}/cellranger_count/cellranger.finish".format(OUTDIR)
+    threads: get_resource("default", "threads")
+    resources:
+        mem_mb=get_resource("default", "mem_mb"),
+        walltime=get_resource("default", "walltime")
+    log:
+        err="{}/{{sample}}/cellranger_mv.err".format(LOGDIR),
+        out="{}/{{sample}}/cellranger_mv.out".format(LOGDIR)
+    shell:
+       """
+       rsync -av {wildcards.sample}/* {OUTDIR}/{wildcards.sample}/cellranger_count
+       rm -rf {wildcards.sample}
+       touch {OUTDIR}/{wildcards.sample}/cellranger_count/cellranger.finish
+       """
+    
