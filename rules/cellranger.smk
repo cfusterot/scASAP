@@ -36,8 +36,8 @@ rule cellranger_count:
         cellranger-atac count --id={wildcards.sample} \
         --reference={params.reference} \
         --fastqs={input.fq} 2> {log.err} > {log.out}
-        mv {wildcards.sample}/* {OUTDIR}/{wildcards.sample}/cellranger_count
+        cp -R {wildcards.sample}/* {OUTDIR}/{wildcards.sample}/cellranger_count 
+        rm -R {wildcards.sample}
         touch {OUTDIR}/{wildcards.sample}/cellranger_count/cellranger.finish
-        rm -r {wildcards.sample}
         {DATETIME} >> {log.time} 
         """
