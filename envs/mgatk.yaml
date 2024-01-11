@@ -8,6 +8,7 @@ dependencies:
   - r-data.table
   - bioconductor-summarizedexperiment
   - bioconductor-genomicranges
+  - ruamel.yaml=0.17.21
   - python=3.7   # or 2.7
   - pip
   - pip:

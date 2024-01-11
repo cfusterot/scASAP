@@ -30,12 +30,13 @@ if config["signac"]["enable"]:
                 mgatk="{}/{{sample}}/mgatk/final/{{sample}}.variant_stats.tsv.gz".format(OUTDIR),
                 amulet="{}/{{sample}}/amulet/MultipletSummary.txt".format(OUTDIR)
             output:
-                file="{}/{{sample}}/signac/SeuratObject_{{sample}}.rds".format(OUTDIR)
+                file="{}/integration/SeuratObject_{{sample}}.rds".format(OUTDIR)
             conda:
                 "../envs/signac.yaml"
             params: 
+                dir_sample=directory("{}/{{sample}}/").format(OUTDIR),
+                dir_integration=directory("{}/integration/").format(OUTDIR),
                 sample_ID="{{sample}}",
-                directory=directory("{}/{{sample}}/signac/").format(OUTDIR),
                 mgatk_dir=directory("{}/{{sample}}/mgatk/final/").format(OUTDIR),
                 min_peak_width=config['signac']['qc']['min_peak_width'],
                 max_peak_width=config['signac']['qc']['max_peak_width'],
@@ -56,9 +57,9 @@ if config["signac"]["enable"]:
 
         rule step2_signac:
             input:
-                file = "{}/{{alias}}/signac/SeuratObject_{{alias}}.rds".format(OUTDIR)
+                file = "{}/integration/SeuratObject_{{sample}}.rds".format(OUTDIR)
             output:
-                file = "{}/{{alias}}/signac/SeuratObject_{{alias}}.s2.rds".format(OUTDIR)
+                file = "{}/{{sample}}/signac/SeuratObject_{{sample}}.s2.rds".format(OUTDIR)
             conda:
                 "../envs/signac.yaml"
             params:
@@ -79,8 +80,8 @@ if config["signac"]["enable"]:
                 mem_mb=get_resource("signac", "mem_mb"),
                 walltime=get_resource("signac", "walltime")
             log:
-                err="{}/signac/{{alias}}_step2_signac.err".format(LOGDIR),
-                out="{}/signac/{{alias}}_step2_signac.out".format(LOGDIR)
+                err="{}/signac/{{sample}}_step2_signac.err".format(LOGDIR),
+                out="{}/signac/{{sample}}_step2_signac.out".format(LOGDIR)
             script:
                 "../scripts/step2_mitoassay.R"
 

@@ -11,7 +11,7 @@ FindCommonPeaks_scATACseq = function(dir.data.samples,  MaxPeakWidth, MinPeakWid
   # Create a combined peak set
   ## Create a list of peak files
   peak.list = sapply(dir.data.samples, function(y)
-                     list(read.table(paste0(y,"/cellranger_count/outs/filtered_peak_bc_matrix/peaks.bed"),
+                     list(read.table(paste0(y,"/filtered_peak_bc_matrix/peaks.bed"),
                                      col.names = c("chr", "start", "end"))))
   ## Convert to Granges objects
   gr.list = lapply(peak.list, function(x) makeGRangesFromDataFrame(x))
@@ -36,7 +36,7 @@ CreateATACobject = function(sample.ID, dir.data.sample, MinCounts, dir.output, g
     if(integration){
           combined.peaks = read.table(paste0(dir.output, "/CommonSetOfPeaks.bed"))
   } else {
-        combined.peaks = read.table(paste0(dir.data.sample, "/cellranger_count/outs/filtered_peak_bc_matrix/peaks.bed"))
+        combined.peaks = read.table(paste0(dir.data.sample, "/filtered_peak_bc_matrix/peaks.bed"))
     }
   combined.peaks = makeGRangesFromDataFrame(combined.peaks)
   # Create fragment objects and cell filtering
