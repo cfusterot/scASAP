@@ -31,19 +31,11 @@ rule cellranger_count:
         out="{}/{{sample}}/cellranger.out".format(LOGDIR),
     shell:
         """
-<<<<<<< HEAD
-        {DATETIME} > {log.time} &&
-        cellranger-atac count --id={wildcards.sample} \
-        --reference={params.reference} \
-        --fastqs={input.fq} 2> {log.err} > {log.out}
+        cellranger-atac count --id={wildcards.sample} --reference={params.reference} --fastqs={input.fq} 2> {log.err} > {log.out}
         cp -R {wildcards.sample}/* {OUTDIR}/{wildcards.sample}/cellranger_count 
         rm -R {wildcards.sample}
         touch {OUTDIR}/{wildcards.sample}/cellranger_count/cellranger.finish
-        {DATETIME} >> {log.time} 
-=======
-        cellranger-atac count --id={wildcards.sample} --reference={params.reference} --fastqs={input.fq} 2> {log.err} > {log.out}
         {DATETIME} >> {output.finish} 
->>>>>>> 43c662ef70b5fb76c8016abe59e047268bc5a419
         """
 
 rule cellranger_mv:

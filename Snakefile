@@ -77,7 +77,7 @@ rule all:
                 "{OUTDIR}/{sample}/mgatk/final/{sample}.variant_stats.tsv.gz",
                 "{OUTDIR}/{sample}/amulet/MultipletSummary.txt",
                 "{OUTDIR}/integration/SeuratObject_{sample}.rds"
-                #"{OUTDIR}/{sample}/signac/01_preprocessing_{sample}.html"
+                "{OUTDIR}/{sample}/signac/01_preprocessing_{sample}.html"
                 ], sample=samples['sample'], OUTDIR=OUTDIR),
         signac_output
 

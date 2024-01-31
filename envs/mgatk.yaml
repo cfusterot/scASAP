@@ -9,11 +9,14 @@ dependencies:
   - bioconductor-summarizedexperiment
   - bioconductor-genomicranges
   - ruamel.yaml=0.17.21
-  - python=3.7   # or 2.7
+  - java-jdk
+  - python=3.7   # 3.7 or 2.7
+  - pulp
   - pip
   - pip:
+    - encoding-tools
     - click
     - dataclasses
     - pyyaml
     - matplotlib
-    - mgatk
+    - mgatk=0.7.0
