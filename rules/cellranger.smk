@@ -32,7 +32,9 @@ rule cellranger_count:
     shell:
         """
         cellranger-atac count --id={wildcards.sample} --reference={params.reference} --fastqs={input.fq} 2> {log.err} > {log.out}
-        cp -R {wildcards.sample}/* {OUTDIR}/{wildcards.sample}/cellranger_count 
+        rm -rf {wildcards.sample}/cellranger_count/outs/analysis
+        rm -rf {wildcards.sample}/cellranger_count/outs/cloupe.cloupe
+        cp -R {wildcards.sample}/outs {OUTDIR}/{wildcards.sample}/cellranger_count 
         rm -R {wildcards.sample}
         touch {OUTDIR}/{wildcards.sample}/cellranger_count/cellranger.finish
         {DATETIME} >> {output.finish} 
