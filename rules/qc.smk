@@ -16,22 +16,27 @@ def get_fastq_name(wc):
     s = wc.sample + "_"
     return [file.split(s)[1].split('.fastq.gz')[0] for file in os.listdir(directory)]
 
+def get_fastq_prefix(wc):
+    directory=units.loc[wc.sample]['fqs']
+    s = wc.sample + "_"
+    return [file.split(s)[0].split('.fastq.gz')[0] for file in os.listdir(directory)]
+
 # -- Rules -- #
 rule fastqc:
     input:
-        fq= lambda wc: expand("{DIR}/{{sample}}_{{name}}.fastq.gz", DIR = units.loc[wc.sample]['fqs'])
+        fq= lambda wc: expand("{DIR}/{{prefix}}_{{name}}.fastq.gz", DIR = units.loc[wc.sample]['fqs'])
     output:
-        html=expand("{OUTDIR}/{{sample}}/qc/fastqc/{{sample}}_{{name}}_fastqc.html", OUTDIR=OUTDIR),
-        zip=expand("{OUTDIR}/{{sample}}/qc/fastqc/{{sample}}_{{name}}_fastqc.zip", OUTDIR=OUTDIR)
+        html=expand("{OUTDIR}/{{sample}}/qc/fastqc/{{prefix}}_{{name}}_fastqc.html", OUTDIR=OUTDIR),
+        zip=expand("{OUTDIR}/{{sample}}/qc/fastqc/{{prefix}}_{{name}}_fastqc.zip", OUTDIR=OUTDIR)
     params:
         lambda wc: "-t {}".format(get_resource("fastqc","threads")) 
     resources:
         mem_mb=get_resource("fastqc", "mem_mb"),
         walltime=get_resource("fastqc", "walltime")
     log:
-        "{}/{{sample}}/fastqc_{{sample}}_{{name}}.log".format(LOGDIR)
+        "{}/{{sample}}/fastqc_{{prefix}}_{{name}}.log".format(LOGDIR)
     benchmark:
-        "{}/{{sample}}/fastqc_{{sample}}_{{name}}.bmk".format(LOGDIR)
+        "{}/{{sample}}/fastqc_{{prefix}}_{{name}}.bmk".format(LOGDIR)
     threads: 
         threads=get_resource("fastqc", "threads")
     wrapper:
@@ -60,15 +65,15 @@ rule fastq_screen_indexes:
 
 rule fastq_screen:
     input:
-        fq=lambda wc: expand("{DIR}/{{sample}}/qc/fastqc/{{sample}}_{{name}}_fastqc.html", DIR = units.loc[wc.sample]['fqs']),
+        fq=lambda wc: expand("{DIR}/{{sample}}/qc/fastqc/{{prefix}}_{{name}}_fastqc.html", DIR = units.loc[wc.sample]['fqs']),
         conf="{}/FastQ_Screen_Genomes/fastq_screen.conf".format(config["fastq_screen"]["index_dir"])
     output:
-        txt=expand("{OUTDIR}/{{sample}}/qc/fastq_screen/{{sample}}_{{name}}.fastq_screen.txt", OUTDIR=OUTDIR),
-        png=expand("{OUTDIR}/{{sample}}/qc/fastq_screen/{{sample}}_{{name}}.fastq_screen.png", OUTDIR=OUTDIR)
+        txt=expand("{OUTDIR}/{{sample}}/qc/fastq_screen/{{prefix}}_{{name}}.fastq_screen.txt", OUTDIR=OUTDIR),
+        png=expand("{OUTDIR}/{{sample}}/qc/fastq_screen/{{prefix}}_{{name}}.fastq_screen.png", OUTDIR=OUTDIR)
     log:
-        "{}/{{sample}}/fastq_screen_{{sample}}_{{name}}.log".format(LOGDIR)
+        "{}/{{sample}}/fastq_screen_{{prefix}}_{{name}}.log".format(LOGDIR)
     benchmark:
-        "{}/{{sample}}/fastq_screen_{{sample}}_{{name}}.bmk".format(LOGDIR)
+        "{}/{{sample}}/fastq_screen_{{prefix}}_{{name}}.bmk".format(LOGDIR)
     threads: get_resource("fastq_screen","threads")
     resources:
         mem_mb=get_resource("fastq_screen","mem_mb"),
@@ -81,10 +86,10 @@ rule fastq_screen:
         "v1.23.4/bio/fastq_screen"
 
 def multiqc_input(wc):
-    f=expand("{OUTDIR}/{{sample}}/qc/fastqc/{{sample}}_{name}_fastqc.zip", OUTDIR=OUTDIR, name = get_fastq_name(wc)) 
+    f=expand("{OUTDIR}/{{sample}}/qc/fastqc/{prefix}_{name}_fastqc.zip", OUTDIR=OUTDIR, prefix = get_fastq_prefix(wc), name = get_fastq_name(wc)) 
     try: 
         if config["parameters"]["fastq_screen"]["enabled"]:
-            f +=expand("{OUTDIR}/{{sample}}/qc/fastq_screen/{{sample}}.{name}.fastq_screen.txt", OUTDIR=OUTDIR, name=get_fastq_name)
+            f +=expand("{OUTDIR}/{{sample}}/qc/fastq_screen/{prefix}.{name}.fastq_screen.txt", OUTDIR=OUTDIR, prefix=get_fastq_prefix, name=get_fastq_name)
     except KeyError:
         print("FASTQ_SCREEN disabled by config file. Skipping...")
     return f
@@ -105,4 +110,4 @@ rule multiqc:
         mem_mb=get_resource("multiqc","mem_mb"),
         walltime=get_resource("multiqc","walltime")
     wrapper:
-        "v2.9.0/bio/multiqc"
+        "v1.23.3/bio/multiqc"
