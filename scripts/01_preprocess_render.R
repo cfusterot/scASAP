@@ -3,7 +3,7 @@ outs = snakemake@params$outs
 print(outs)
 directory = snakemake@params$directory
 print(directory)
-sample_id = unlist(sapply(strsplit(unlist(sapply(strsplit(outs, directory),`[`, 2, simplify=FALSE)), "/cellranger_count/outs"), `[`, 1, simplify=FALSE))
+sample_id = unlist(sapply(strsplit(unlist(sapply(strsplit(outs, directory),`[`, 2, simplify=FALSE)), "/cellranger_count/"), `[`, 1, simplify=FALSE))
 print(sample_id)
 #ref_rna = snakemake@params$reference_rna
 #print(ref_rna)
