@@ -65,11 +65,14 @@ if config["signac"]["enable"]:
             params:
                 mito = config['signac']['mito']['enable'],
                 integration = config['signac']['integrate_samples'],
+                dir_integration=directory("{}/integration/").format(OUTDIR),
+                dir_sample=directory("{}/{{sample}}/").format(OUTDIR),
                 cores = config['signac']['cores'],
                 min_peak_fragment = config['signac']['qc']['min_peak_fragment'],
                 max_peak_fragment = config['signac']['qc']['max_peak_fragment'],
                 min_percentage_peaks = config['signac']['qc']['min_percentage_peaks'], 
                 max_nucleosome_signal = config['signac']['qc']['max_nucleosome_signal'],
+                sample_ID="{{sample}}",
                 min_TSS = config['signac']['qc']['min_TSS'],
                 min_strand_cor = config['signac']['mito']['min_strand_cor'],
                 min_VMR = config['signac']['mito']['min_VMR'],
@@ -87,19 +90,20 @@ if config["signac"]["enable"]:
 
         rule step3_signac:
             input:
-                seurat_in = "{}/{{alias}}/signac/SeuratObject_{{alias}}.s2.rds".format(OUTDIR)
+                seurat_in = "{}/{{sample}}/signac/SeuratObject_{{sample}}.s2.rds".format(OUTDIR)
             output:
-                seurat_out = "{}/{{alias}}/signac/SeuratObjectBis_{{alias}}.rds".format(OUTDIR)
+                seurat_out = "{}/{{sample}}/signac/SeuratObjectBis_{{sample}}.rds".format(OUTDIR)
             conda:
                 "../envs/signac.yaml"
             params:
+                sample_ID="{{sample}}",
                 fc_resolution = config['signac']['mito']['clonotype_finding']['fc_resolution'],
                 fc_k = config['signac']['mito']['clonotype_finding']['fc_k']
             threads: get_resource("signac", "threads")
             resources:
             log:
-                err="{}/signac/{{alias}}_step2_signac.err".format(LOGDIR),
-                out="{}/signac/{{alias}}_step2_signac.out".format(LOGDIR)
+                err="{}/signac/{{sample}}_step3_signac.err".format(LOGDIR),
+                out="{}/signac/{{sample}}_step3_signac.out".format(LOGDIR)
             script:
                 "../scripts/step3_findclonotypes.R"
 
@@ -127,8 +131,8 @@ if config["signac"]["enable"]:
             threads: get_resource("signac", "threads")
             resources:
             log:
-                err=expand("{LOGDIR}/signac/step2_signac.err", LOGDIR = LOGDIR),
-                out=expand("{LOGDIR}/signac/step2_signac.out", LOGDIR = LOGDIR)
+                err=expand("{LOGDIR}/signac/step4_signac.err", LOGDIR = LOGDIR),
+                out=expand("{LOGDIR}/signac/step4_signac.out", LOGDIR = LOGDIR)
             script:
                 "../scripts/step4_merge.R"
 
@@ -145,7 +149,7 @@ if config["signac"]["enable"]:
                 "../envs/signac.yaml"
             params: 
                 mgatk="{}/{{sample}}/mgatk/final/".format(OUTDIR),
-                outs="{}/{{sample}}/cellranger_count".format(OUTDIR),
+                outs="{}/{{sample}}/cellranger_count/".format(OUTDIR),
                 directory = expand("{OUTDIR}/", OUTDIR = OUTDIR),
                 reference = config['signac']['annotation']['reference'],
                 haplogroup = config['signac']['annotation']['haplogroup'],
