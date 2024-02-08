@@ -18,8 +18,8 @@ def get_fastq_name(wc):
 
 def get_fastq_prefix(wc):
     directory=units.loc[wc.sample]['fqs']
-    s = wc.sample + "_"
-    return [file.split(s)[0].split('.fastq.gz')[0] for file in os.listdir(directory)]
+    return [re.split('_S[0-9]{1,2}_L00[0-9]_([R|I][0-9])_001',file)[0].split('.fastq.gz')[0] for file in os.listdir(directory)]
+
 
 # -- Rules -- #
 rule fastqc:

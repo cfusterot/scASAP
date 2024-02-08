@@ -8,8 +8,8 @@ rule amulet:
     conda:
         "../envs/amulet.yaml"
     params:
-        fragments="{}/{{sample}}/cellranger_count/outs/fragments.tsv.gz".format(OUTDIR),
-        singlecells="{}/{{sample}}/cellranger_count/outs/singlecell.csv".format(OUTDIR),
+        fragments="{}/{{sample}}/cellranger_count/fragments.tsv.gz".format(OUTDIR),
+        singlecells="{}/{{sample}}/cellranger_count/singlecell.csv".format(OUTDIR),
         amulet="resources/AMULET",
         autosomes=config['amulet']['autosomes'],
         blacklist=config['amulet']['blacklist']

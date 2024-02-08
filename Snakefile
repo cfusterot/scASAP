@@ -33,7 +33,7 @@ def get_resource(rule,resource):
         return config["resources"]["default"][resource]
 
 def get_common_peaks(wc):
-    file = expand("{OUTDIR}/{sample}/cellranger_count/outs/", sample = samples['sample'], OUTDIR=OUTDIR)
+    file = expand("{OUTDIR}/{sample}/cellranger_count/", sample = samples['sample'], OUTDIR=OUTDIR)
     file = list(set(file))
     return file
 
@@ -72,8 +72,8 @@ def signac_output(wc):
 
 rule all:
     input:
-        expand(["{OUTDIR}/{sample}/cellranger_count/cellranger.finish",
-                "{OUTDIR}/{sample}/qc/multiqc_report.html",
+        expand([ #"{OUTDIR}/{sample}/cellranger_count/cellranger.finish",
+                #"{OUTDIR}/{sample}/qc/multiqc_report.html",
                 "{OUTDIR}/{sample}/mgatk/final/{sample}.variant_stats.tsv.gz",
                 "{OUTDIR}/{sample}/amulet/MultipletSummary.txt",
                 "{OUTDIR}/integration/SeuratObject_{sample}.rds",
@@ -82,7 +82,7 @@ rule all:
         signac_output
 
 # -- Rule files -- #
-include: "rules/cellranger.smk"
+#include: "rules/cellranger.smk"
 include: "rules/qc.smk"
 include: "rules/mgatk.smk"
 include: "rules/amulet.smk"

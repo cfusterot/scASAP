@@ -24,8 +24,10 @@ library("Seurat")
 # -------- Load parameters -------- #
 mito = snakemake@params[['mito']]
 integration = snakemake@params[["integration"]]
-dir.output = "processing"
-sample=snakemake@params[["sample"]]
+dir_integration = snakemake@params[["dir_integration"]]
+dir_sample = snakemake@params[["dir_sample"]]
+sample=snakemake@params[["sample_ID"]]
+sample_ID = strsplit(sample, '[{}]')[[1]][2]
 ## chosen by user
 minPeakFrag = snakemake@params[["min_peak_fragment"]]
 maxPeakFrag = snakemake@params[["max_peak_fragment"]]
@@ -40,10 +42,10 @@ minMitoDepth = snakemake@params[["min_depth"]]
 
 # -------- Read files, set variables -------- #
 samples = read.table("config/samples.tsv", header = T)
-alias_ID = samples[sample, "alias"] 
+alias_ID = samples[sample_ID, "alias"] 
 
 # -------- Run functions -------- #
-seurat.obj = readRDS(paste0(dir.output, "/SeuratObject_", alias_ID, ".rds"))
+seurat.obj = readRDS(paste0(dir_integration, "/SeuratObject_", sample_ID, ".rds"))
 seurat.obj = Filter_ATAC(seurat = seurat.obj,
                            minPeakFrag = minPeakFrag,
                            maxPeakFrag = maxPeakFrag,
@@ -53,8 +55,8 @@ seurat.obj = Filter_ATAC(seurat = seurat.obj,
 
 if(mito){
     seurat.obj = Add_MGATK(seurat = seurat.obj,
-                           dir.data.sample = samples[samples, "Directory"],
-                           sample.ID = alias_ID,
+                           dir.data.sample = file.path(dir_sample, sample_ID),
+                           sample.ID = sample_ID,
                            MinCellVar = MinCellVar,
                            MinStrandCor = MinStrandCor,
                            MinVMR = MinVMR,
@@ -62,7 +64,7 @@ if(mito){
 }
 
 message(paste0("Saving seurat object for sample: ", alias_ID))
-saveRDS(seurat.obj, paste0(dir.output, "/SeuratObject_", alias_ID, ".rds"))
+saveRDS(seurat.obj, paste0(dir_sample, "/SeuratObject_", alias_ID, ".rds"))
 
 if (mito){
   cols = setNames(c("#006600", "#006666", "#99CC99", "#CCCC33", "#CC9900"), c('pct_reads_in_peaks', 'peak_region_fragments', 'TSS.enrichment', 'nucleosome_signal', 'mtDNA_depth'))
@@ -71,14 +73,14 @@ if (mito){
 }
 
 pdf(paste0(dir.output, "/plots/vlnplot_qc_afterfiltering_ATAC.pdf"), width = (1+1.3*nrow(samples)), height = 4)
-QCplot(df = meta, metric = x, color = cols[x], n.samples = nrow(samples), max.y = NULL, name.ID = name.ID))
+QCplot(df = meta, metric = x, color = cols[x], n.samples = nrow(samples), max.y = NULL, name.ID = name.ID)
 dev.off()
 
 if(mito){
-  file.variants = list.files(dir.output, full.names = T)
+  file.variants = list.files(dir_samples, full.names = T)
   file.variants = grep("HighConf", file.variants, value = T)
   variants = unique(unlist(sapply(file.variants, function(x) read.table(x, header = T)$variant)))
-  Calculate_Hetroplasmy(sample.ID = alias_ID, 
-                          dir.output = dir.output,
+  Calculate_Hetroplasmy(sample.ID = sample_ID, 
+                          dir.output = dir_sample,
                           variants = variants)
 }

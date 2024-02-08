@@ -145,7 +145,7 @@ if config["signac"]["enable"]:
                 "../envs/signac.yaml"
             params: 
                 mgatk="{}/{{sample}}/mgatk/final/".format(OUTDIR),
-                outs="{}/{{sample}}/cellranger_count/outs".format(OUTDIR),
+                outs="{}/{{sample}}/cellranger_count".format(OUTDIR),
                 directory = expand("{OUTDIR}/", OUTDIR = OUTDIR),
                 reference = config['signac']['annotation']['reference'],
                 haplogroup = config['signac']['annotation']['haplogroup'],

@@ -42,7 +42,7 @@ CreateATACobject = function(sample.ID, dir.data.sample, MinCounts, dir.output, g
   # Create fragment objects and cell filtering
   # Load metadata
   meta = read.table(
-    file = paste0(dir.data.sample, "/cellranger_count/outs/singlecell.csv"),
+    file = paste0(dir.data.sample, "/cellranger_count/singlecell.csv"),
     stringsAsFactors = F,
     sep = ",",
     header = T,
@@ -50,10 +50,10 @@ CreateATACobject = function(sample.ID, dir.data.sample, MinCounts, dir.output, g
   )[-1,]
   # Perform an initial filtering (low count cells)
   meta = meta[meta[, "passed_filters"] > MinCounts,]
-  cells.to.keep = read.table(paste0(dir.data.sample, "/cellranger_count/outs/filtered_peak_bc_matrix/barcodes.tsv"))$V1 # Discard empty droplets
+  cells.to.keep = read.table(paste0(dir.data.sample, "/cellranger_count/filtered_peak_bc_matrix/barcodes.tsv"))$V1 # Discard empty droplets
   meta = meta[cells.to.keep,]                        
   # Create fragment objects
-  frag = CreateFragmentObject(path = paste0(dir.data.sample, "/cellranger_count/outs/fragments.tsv.gz"), cells = rownames(meta))
+  frag = CreateFragmentObject(path = paste0(dir.data.sample, "/cellranger_count/fragments.tsv.gz"), cells = rownames(meta))
   # Quantifying peaks
   counts = FeatureMatrix(fragments = frag, features = combined.peaks, cells = rownames(meta))
   # Create chromatin assay

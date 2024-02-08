@@ -19,4 +19,4 @@ dependencies:
     - dataclasses
     - pyyaml
     - matplotlib
-    - mgatk=0.7.0
+    - mgatk==0.7.0

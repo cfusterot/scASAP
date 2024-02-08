@@ -4,7 +4,7 @@ rule mgatk:
     input:
         finish="{}/{{sample}}/cellranger_count/cellranger.finish".format(OUTDIR)
     params:
-        bam="{}/{{sample}}/cellranger_count/outs/possorted_bam.bam".format(OUTDIR)
+        bam="{}/{{sample}}/cellranger_count/possorted_bam.bam".format(OUTDIR)
     output:
         ref="{}/{{sample}}/mgatk/final/{{sample}}.variant_stats.tsv.gz".format(OUTDIR)
     conda:
@@ -28,5 +28,5 @@ rule mgatk:
         # enter sample folder
         cd {OUTDIR}/{wildcards.sample}
         # run mgatk command
-        mgatk tenx -i {params.bam} -n {wildcards.sample} -o {OUTDIR}/{wildcards.sample}/mgatk/ -bt CB -b {OUTDIR}/{wildcards.sample}/cellranger_count/outs/filtered_peak_bc_matrix/barcodes.tsv 
+        mgatk tenx -i {params.bam} -n {wildcards.sample} -o {OUTDIR}/{wildcards.sample}/mgatk/ -bt CB -b {OUTDIR}/{wildcards.sample}/cellranger_count/filtered_peak_bc_matrix/barcodes.tsv 
         """
