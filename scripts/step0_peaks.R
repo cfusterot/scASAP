@@ -34,7 +34,7 @@ print(dir_output)
 outdir = strsplit(dir_output, "integration/")[[1]]
 message("outdir:")
 print(outdir)
-samples_ID = unlist(sapply(strsplit(unlist(sapply(strsplit(outs, outdir), `[`, 2, simplify=FALSE)), "/cellranger_count/outs"), `[`, 1, simplify=FALSE))
+samples_ID = unlist(sapply(strsplit(unlist(sapply(strsplit(outs, outdir), `[`, 2, simplify=FALSE)), "/cellranger_count"), `[`, 1, simplify=FALSE))
 print(samples_ID)
 
 # -------- Run functions -------- #

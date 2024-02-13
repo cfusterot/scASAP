@@ -50,7 +50,7 @@ mgatk = snakemake@input[["mgatk"]]
 amulet = snakemake@input[["amulet"]]
 dir_output = snakemake@output[["directory"]]
 outdir = strsplit(dir_output, "/signac")[[1]]
-samples.ID = unlist(sapply(strsplit(unlist(sapply(strsplit(outs, outdir), `[`, 2, simplify=FALSE)), "/cellranger_count/outs"), `[`, 1, simplify=FALSE))
+samples.ID = unlist(sapply(strsplit(unlist(sapply(strsplit(outs, outdir), `[`, 2, simplify=FALSE)), "/cellranger_count"), `[`, 1, simplify=FALSE))
 
 # -------- Run functions -------- #
 message("START:")
