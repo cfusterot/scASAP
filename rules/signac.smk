@@ -96,6 +96,7 @@ if config["signac"]["enable"]:
             conda:
                 "../envs/signac.yaml"
             params:
+                dir_sample=directory("{}/{{sample}}/").format(OUTDIR),
                 sample_ID="{{sample}}",
                 fc_resolution = config['signac']['mito']['clonotype_finding']['fc_resolution'],
                 fc_k = config['signac']['mito']['clonotype_finding']['fc_k']

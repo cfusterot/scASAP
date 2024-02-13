@@ -137,8 +137,8 @@ Add_MGATK = function(seurat, dir.data.sample, sample.ID, MinCellVar, MinStrandCo
 
   #Identify variants
   variable.sites = IdentifyVariants(seurat, assay = "mito", refallele = mgatk$refallele)
-
-  pdf(paste0(dir.output, "/Plots/VariantPlot_", sample.ID, ".pdf"), width = 6, height = 6)
+  dir.create(file.path(dir.data.sample, "signac", "plots"))
+  pdf(paste0(dir.data.sample, "/signac/plots/VariantPlot_", sample.ID, ".pdf"), width = 6, height = 6)
   print(VariantPlot(variants = variable.sites, min.cells = MinCellVar, concordance.threshold = MinStrandCor, vmr.threshold = MinVMR) +
           theme(text = element_text(colour = "black", size = 15),
                 axis.line = element_line(color = "black", size = 0.8),
@@ -153,7 +153,7 @@ Add_MGATK = function(seurat, dir.data.sample, sample.ID, MinCellVar, MinStrandCo
       vmr > MinVMR
   )
 
-  write.table(high.conf, paste0(dir.output, "/HighConfVariants_", sample.ID, ".txt"))
+  write.table(high.conf, paste0(dir.data.sample, "/signac/HighConfVariants_", sample.ID, ".txt"))
   return(seurat)
 }
 # --- 5. Heteroplasmy level calculation --- #
@@ -162,7 +162,7 @@ Add_MGATK = function(seurat, dir.data.sample, sample.ID, MinCellVar, MinStrandCo
 # - variants 
 # - dir.output
 Calculate_Hetroplasmy = function(sample.ID, variants, dir.output){
-  seurat = readRDS(paste0(dir.output, "/SeuratObject_", sample.ID, ".rds"))
+  seurat = readRDS(paste0(dir.output, "/SeuratObject_", sample.ID, ".s2.rds"))
 
   seurat = AlleleFreq(
     object = seurat,
@@ -170,7 +170,7 @@ Calculate_Hetroplasmy = function(sample.ID, variants, dir.output){
     assay = "mito"
   )
 
-  saveRDS(seurat, paste0(dir.output, "/SeuratObject_", sample.ID, ".rds"))
+  saveRDS(seurat, paste0(dir.output, "/SeuratObject_", sample.ID, ".s2.rds"))
 }
 
 ##from Caleb

@@ -65,20 +65,21 @@ def get_step3_output(wc):
 # -- Final output -- #
 def signac_output(wc):
     if config["signac"]["enable"]:
-        file = expand("{OUTDIR}/{sample}/signac/SeuratObject_{sample}.rds", sample=samples['sample'], OUTDIR=OUTDIR)    
+        file = expand("{OUTDIR}/{sample}/signac/SeuratObject_{sample}.rds", sample=samples['sample'],OUTDIR=OUTDIR)    
     if config["signac"]["individual_analysis"]:
-        file = expand("{OUTDIR}/{sample}/signac/01_preprocessing_{sample}.html", sample=samples['sample'], OUTDIR=OUTDIR)
-    if config["signac"]["integrate_samples"]:
-        file = expand("{OUTDIR}/integration/SeuratObject_{sample}.rds", sample=samples['sample'], OUTDIR=OUTDIR)
+        file = expand("{OUTDIR}/{sample}/signac/01_preprocessing_{sample}.html", sample=samples['sample'],OUTDIR=OUTDIR)
     return file
 
 rule all:
     input:
-        expand([ #"{OUTDIR}/{sample}/cellranger_count/cellranger.finish",
-                #"{OUTDIR}/{sample}/qc/multiqc_report.html",
+        expand(["{OUTDIR}/{sample}/cellranger_count/cellranger.finish",
+#                "{OUTDIR}/{sample}/qc/multiqc_report.html",
                 "{OUTDIR}/{sample}/mgatk/final/{sample}.variant_stats.tsv.gz",
-                "{OUTDIR}/{sample}/amulet/MultipletSummary.txt"], 
-                sample=samples['sample'], OUTDIR=OUTDIR),
+                "{OUTDIR}/{sample}/amulet/MultipletSummary.txt",
+#                "{OUTDIR}/integration/SeuratObject_{sample}.rds",
+                "{OUTDIR}/integration/SeuratObject_Merge.rds",
+                "{OUTDIR}/{sample}/signac/01_preprocessing_{sample}.html"
+                ], sample=samples['sample'], OUTDIR=OUTDIR),
         signac_output
 
 # -- Rule files -- #

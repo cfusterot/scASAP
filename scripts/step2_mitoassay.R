@@ -53,9 +53,11 @@ seurat.obj = Filter_ATAC(seurat = seurat.obj,
                            maxNucleoSig = maxNucleoSig,
                            minTSS = minTSS)
 
+print(dir_sample)
+
 if(mito){
     seurat.obj = Add_MGATK(seurat = seurat.obj,
-                           dir.data.sample = file.path(dir_sample, sample_ID),
+                           dir.data.sample = dir_sample,
                            sample.ID = sample_ID,
                            MinCellVar = MinCellVar,
                            MinStrandCor = MinStrandCor,
@@ -63,8 +65,8 @@ if(mito){
                            minMitoDepth = minMitoDepth)
 }
 
-message(paste0("Saving seurat object for sample: ", alias_ID))
-saveRDS(seurat.obj, paste0(dir_sample, "/SeuratObject_", alias_ID, ".rds"))
+message(paste0("Saving seurat object for sample: ", sample_ID))
+saveRDS(seurat.obj, paste0(dir_sample, "/signac/SeuratObject_", sample_ID, ".s2.rds"))
 
 if (mito){
   cols = setNames(c("#006600", "#006666", "#99CC99", "#CCCC33", "#CC9900"), c('pct_reads_in_peaks', 'peak_region_fragments', 'TSS.enrichment', 'nucleosome_signal', 'mtDNA_depth'))
@@ -72,15 +74,18 @@ if (mito){
   cols = setNames(c("#006600", "#006666", "#99CC99", "#CCCC33"), c('pct_reads_in_peaks', 'peak_region_fragments', 'TSS.enrichment', 'nucleosome_signal'))
 }
 
-pdf(paste0(dir.output, "/plots/vlnplot_qc_afterfiltering_ATAC.pdf"), width = (1+1.3*nrow(samples)), height = 4)
-QCplot(df = meta, metric = x, color = cols[x], n.samples = nrow(samples), max.y = NULL, name.ID = name.ID)
+pdf(paste0(dir_sample, "/signac/plots/vlnplot_qc_afterfiltering_ATAC.pdf"), width = (1+1.3*nrow(samples)), height = 4)
+sapply(names(cols), function(x){
+         print(x)
+         QCplot(df = seurat.obj@meta.data, metric = x, color = cols[x], n.samples = nrow(samples), max.y = NULL, name.ID = sample_ID)
+})         
 dev.off()
 
 if(mito){
-  file.variants = list.files(dir_samples, full.names = T)
+  file.variants = list.files(file.path(dir_sample,"signac"),  full.names = T)
   file.variants = grep("HighConf", file.variants, value = T)
-  variants = unique(unlist(sapply(file.variants, function(x) read.table(x, header = T)$variant)))
+  variants = unique(unlist(sapply(file.variants, function(x) read.table(x, header = T)$variant)))[, 1]
   Calculate_Hetroplasmy(sample.ID = sample_ID, 
-                          dir.output = dir_sample,
+                          dir.output = file.path(dir_sample,"signac"),
                           variants = variants)
 }
