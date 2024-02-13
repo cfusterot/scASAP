@@ -118,7 +118,7 @@ pbmc$mtDNA_depth <- mtDepth[Cells(pbmc),]
 ```
 
 **QC visualization**
-```{r QC plot, fig.width=6, fig.height=6, fig.fullwidth=TRUE}
+```{r QC plot, fig.width=18, fig.height=6, fig.fullwidth=TRUE}
 # visulize QC metrics 
 VlnPlot(
     object = pbmc,
@@ -129,7 +129,7 @@ VlnPlot(
 
 ### QC filtering
 
-The following parameter were used to remove low quality cells : (1) peaks counts less than 1000 or more than 25,000. (2) RNA counts less than 1000 or more than 20,000. (3) nucleosome signal more than 2, (4) TSS enrichment score less than 3, and (5) mitochondrial reads more than 10%.
+The following parameter were used to remove low quality cells : (1) peaks counts less than 1000 or more than 25,000; (2) nucleosome signal more than 2; (3) TSS enrichment score less than 3
 
 ```{r Filtering, message=FALSE, warning=FALSE}
 # filter out low quality cells
@@ -165,10 +165,10 @@ pbmc <- RunTFIDF(pbmc) %>% RunSVD() %>%
 ```
 
 # Doublet removal 
-Doublet were identified using two computational frameworks: AMULET (based on ATAC) and Scrubelt (based on GEX)
+Doublet were identified using the AMULET computational framework 
 ```{r, fig.width=5, fig.height=5}
 ## amulet
-  multiplets <- read.table(file.path(params$directory, params$sample,"amulet", "MultipletBarcodes_01.txt")) %>% t() %>% as.vector() #/MultipletCellIds_01.txt
+  multiplets <- read.table(file.path(params$directory, params$sample,"amulet", "MultipletBarcodes_01.txt")) %>% t() %>% as.vector() 
   multiplet.metadata <- rep("singlet", length(Cells(pbmc)))
   names(multiplet.metadata) <- Cells(pbmc)
   multiplet.metadata[multiplets] <- "multiplet"
@@ -178,7 +178,7 @@ Doublet were identified using two computational frameworks: AMULET (based on ATA
         cols = c("singlet" = "grey", "multiplet" = "purple"), 
         order = c("multiplet", "singlet"), reduction = "atac.umap")
   
-  pbmc <- subset(pbmc, multiplet_amulet == "singlet") # & multiplet_scrubelt == "singlet")
+ pbmc <- subset(pbmc, multiplet_amulet == "singlet") 
  pbmc
  
 ```
