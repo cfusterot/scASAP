@@ -10,8 +10,8 @@ dependencies:
   - bioconductor-genomicranges
   - ruamel.yaml=0.17.21
   - java-jdk
-  - python=3.7   # 3.7 or 2.7
-  - pulp
+  - python=3.8
+  - pulp=2.7
   - pip
   - pip:
     - encoding-tools
