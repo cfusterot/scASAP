@@ -27,7 +27,7 @@ if config["signac"]["enable"]:
         rule step1_signac:
             input:
                 peaks="{}/integration/CommonSetOfPeaks.bed".format(OUTDIR),
-                mgatk="{}/{{sample}}/mgatk/final/{{sample}}.variant_stats.tsv.gz".format(OUTDIR),
+                mgatk="{}/{{sample}}/mgatk/final/{{sample}}.rds".format(OUTDIR),
                 amulet="{}/{{sample}}/amulet/MultipletSummary.txt".format(OUTDIR)
             output:
                 file="{}/integration/SeuratObject_{{sample}}.rds".format(OUTDIR)
@@ -96,6 +96,7 @@ if config["signac"]["enable"]:
             conda:
                 "../envs/signac.yaml"
             params:
+                samples_tsv = config['samples'],
                 dir_sample=directory("{}/{{sample}}/").format(OUTDIR),
                 sample_ID="{{sample}}",
                 fc_resolution = config['signac']['mito']['clonotype_finding']['fc_resolution'],
@@ -142,7 +143,7 @@ if config["signac"]["enable"]:
         rule step1_preprocess:
             input:
                 outs="{}/{{sample}}/cellranger_count/cellranger.finish".format(OUTDIR), 
-                mgatk="{}/{{sample}}/mgatk/final/{{sample}}.variant_stats.tsv.gz".format(OUTDIR), 
+                mgatk="{}/{{sample}}/mgatk/final/{{sample}}.rds".format(OUTDIR), 
                 amulet="{}/{{sample}}/amulet/MultipletSummary.txt".format(OUTDIR)
             output:
                 report="{}/{{sample}}/signac/01_preprocessing_{{sample}}.html".format(OUTDIR)

@@ -29,9 +29,11 @@ dir.output = snakemake@output[["directory"]]
 name.ID = "sample"
 fc.resolution = snakemake@params['fc_resolution']
 fc.k = snakemake@params['fc_k']
+samples_tsv = snakemake@params['samples_tsv']
 
 # -------- Read files, set variables -------- #
-samples = read.table("config/samples.tsv", header = T)
+message("Reading metadata")
+samples = read.table(samples_tsv, header = T)
 
 # -------- Run functions -------- #
 foreach(grp = rev(unique(samples$condition)), .packages = c("Seurat", "Signac", "stringr")) %dopar%{

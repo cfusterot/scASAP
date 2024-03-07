@@ -74,7 +74,7 @@ rule all:
     input:
         expand(["{OUTDIR}/{sample}/cellranger_count/cellranger.finish",
                 "{OUTDIR}/{sample}/qc/multiqc_report.html",
-                "{OUTDIR}/{sample}/mgatk/final/{sample}.variant_stats.tsv.gz",
+                "{OUTDIR}/{sample}/mgatk/final/{sample}.rds",
                 "{OUTDIR}/{sample}/amulet/MultipletSummary.txt",
                 "{OUTDIR}/integration/SeuratObject_{sample}.rds",
                 "{OUTDIR}/integration/SeuratObject_Merge.rds",

@@ -6,7 +6,7 @@ rule mgatk:
     params:
         bam="{}/{{sample}}/cellranger_count/possorted_bam.bam".format(OUTDIR)
     output:
-        ref="{}/{{sample}}/mgatk/final/{{sample}}.variant_stats.tsv.gz".format(OUTDIR)
+        ref="{}/{{sample}}/mgatk/final/{{sample}}.rds".format(OUTDIR)
     conda:
         "../envs/mgatk.yaml"
     threads: get_resource("mgatk", "threads")
