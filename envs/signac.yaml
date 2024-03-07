@@ -1,4 +1,4 @@
-me: signac
+name: signac
 channels:
     - conda-forge
     - bioconda
@@ -6,28 +6,28 @@ channels:
 dependencies:
     - numpy
     - libgfortran
+    - r-spatstat
+    - r-base=4.2
     - bioconductor-biostrings
     - bioconductor-biovizbase
-    - bioconductor-bsgenome.hsapiens.ucsc.hg38 #bioconductor-bsgenome.mmusculus.ucsc.mm10                    
-    - r-dplyr
     - bioconductor-ensdb.hsapiens.v86 #bioconductor-ensdb.mmusculus.v79
-    - r-foreach
+    - bioconductor-bsgenome.hsapiens.ucsc.hg38 #bioconductor-bsgenome.mmusculus.ucsc.mm10
     - bioconductor-genomicranges
+    - bioconductor-glmgampoi
+    - bioconductor-summarizedexperiment
+    - r-uwot=0.1.14
+    - r-harmony=1.1.0
+    - r-dplyr
+    - r-foreach
     - r-ggplot2
-    - r-harmony
     - r-signac
     - r-seurat                                                   
     - r-data.table
-    - libgfortran                                 
-    - r-uwot=0.1.11
-    - bioconductor-summarizedexperiment
     - r-matrix
     - r-cowplot
     - r-dt
     - r-details
-    - r-seuratdisk
     - r-rmarkdown
-    - bioconductor-glmgampoi
     - r-remotes
     - r-sessioninfo
     - r-doparallel

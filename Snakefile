@@ -53,7 +53,7 @@ def get_integration_amulet(wc):
     return file
 
 def get_step3_output(wc):
-    file = expand("{OUTDIR}/{alias}/signac/SeuratObjectBis_{alias}.rds", OUTDIR=OUTDIR, alias=samples['alias'])
+    file = expand("{OUTDIR}/{sample}/signac/SeuratObjectBis_{sample}.rds", OUTDIR=OUTDIR, sample=samples['sample'])
     file = list(set(file))
     return file
 
@@ -73,17 +73,17 @@ def signac_output(wc):
 rule all:
     input:
         expand(["{OUTDIR}/{sample}/cellranger_count/cellranger.finish",
-#                "{OUTDIR}/{sample}/qc/multiqc_report.html",
+                "{OUTDIR}/{sample}/qc/multiqc_report.html",
                 "{OUTDIR}/{sample}/mgatk/final/{sample}.variant_stats.tsv.gz",
                 "{OUTDIR}/{sample}/amulet/MultipletSummary.txt",
-#                "{OUTDIR}/integration/SeuratObject_{sample}.rds",
+                "{OUTDIR}/integration/SeuratObject_{sample}.rds",
                 "{OUTDIR}/integration/SeuratObject_Merge.rds",
                 "{OUTDIR}/{sample}/signac/01_preprocessing_{sample}.html"
                 ], sample=samples['sample'], OUTDIR=OUTDIR),
         signac_output
 
 # -- Rule files -- #
-#include: "rules/cellranger.smk"
+include: "rules/cellranger.smk"
 include: "rules/qc.smk"
 include: "rules/mgatk.smk"
 include: "rules/amulet.smk"
