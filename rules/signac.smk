@@ -103,6 +103,8 @@ if config["signac"]["enable"]:
                 fc_k = config['signac']['mito']['clonotype_finding']['fc_k']
             threads: get_resource("signac", "threads")
             resources:
+                mem_mb=get_resource("signac", "mem_mb"),
+                walltime=get_resource("signac", "walltime")
             log:
                 err="{}/signac/{{sample}}_step3_signac.err".format(LOGDIR),
                 out="{}/signac/{{sample}}_step3_signac.out".format(LOGDIR)

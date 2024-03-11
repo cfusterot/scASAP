@@ -15,6 +15,7 @@ dependencies:
     - bioconductor-genomicranges
     - bioconductor-glmgampoi
     - bioconductor-summarizedexperiment
+    - r-hdf5r
     - r-uwot=0.1.14
     - r-harmony=1.1.0
     - r-dplyr
@@ -23,7 +24,8 @@ dependencies:
     - r-signac
     - r-seurat                                                   
     - r-data.table
-    - r-matrix
+    - r-irlba
+    - r-matrix=1.6-1.1
     - r-cowplot
     - r-dt
     - r-details
