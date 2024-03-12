@@ -52,8 +52,11 @@ def get_integration_amulet(wc):
     file = list(set(file))
     return file
 
-def get_step3_output(wc):
-    file = expand("{OUTDIR}/{sample}/signac/SeuratObjectBis_{sample}.rds", OUTDIR=OUTDIR, sample=samples['sample'])
+# Step 3 - Grouping samples by condition
+condition_to_samples = samples.groupby('condition')['sample'].apply(list).to_dict()
+
+def get_step4_input(wc):
+    file = expand("{OUTDIR}/integration/SeuratObjectBis_{condition}.rds", OUTDIR=OUTDIR, sample=samples['condition'])
     file = list(set(file))
     return file
 
@@ -76,10 +79,8 @@ rule all:
                 "{OUTDIR}/{sample}/qc/multiqc_report.html",
                 "{OUTDIR}/{sample}/mgatk/final/{sample}.rds",
                 "{OUTDIR}/{sample}/amulet/MultipletSummary.txt",
-                "{OUTDIR}/integration/SeuratObject_{sample}.rds",
-                "{OUTDIR}/integration/SeuratObject_Merge.rds",
-                "{OUTDIR}/{sample}/signac/01_preprocessing_{sample}.html"
-                ], sample=samples['sample'], OUTDIR=OUTDIR),
+                "{OUTDIR}/integration/SeuratObjectBis_{condition}.rds"],
+        sample=samples['sample'], OUTDIR=OUTDIR, condition = samples['condition']),
         signac_output
 
 # -- Rule files -- #

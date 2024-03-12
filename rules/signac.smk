@@ -63,16 +63,16 @@ if config["signac"]["enable"]:
             conda:
                 "../envs/signac.yaml"
             params:
+                dir_sample=directory("{}/{{sample}}/").format(OUTDIR),
+                sample_ID="{{sample}}",
                 mito = config['signac']['mito']['enable'],
                 integration = config['signac']['integrate_samples'],
                 dir_integration=directory("{}/integration/").format(OUTDIR),
-                dir_sample=directory("{}/{{sample}}/").format(OUTDIR),
                 cores = config['signac']['cores'],
                 min_peak_fragment = config['signac']['qc']['min_peak_fragment'],
                 max_peak_fragment = config['signac']['qc']['max_peak_fragment'],
                 min_percentage_peaks = config['signac']['qc']['min_percentage_peaks'], 
                 max_nucleosome_signal = config['signac']['qc']['max_nucleosome_signal'],
-                sample_ID="{{sample}}",
                 min_TSS = config['signac']['qc']['min_TSS'],
                 min_strand_cor = config['signac']['mito']['min_strand_cor'],
                 min_VMR = config['signac']['mito']['min_VMR'],
@@ -90,15 +90,15 @@ if config["signac"]["enable"]:
 
         rule step3_signac:
             input:
-                seurat_in = "{}/{{sample}}/signac/SeuratObject_{{sample}}.s2.rds".format(OUTDIR)
+               seurat_in = lambda wildcards:expand("{outdir}/{sample}/signac/SeuratObject_{sample}.s2.rds", sample=condition_to_samples[wildcards.condition], outdir=OUTDIR)
             output:
-                seurat_out = "{}/{{sample}}/signac/SeuratObjectBis_{{sample}}.rds".format(OUTDIR)
+                seurat_out = "{}/integration/SeuratObjectBis_{{condition}}.rds".format(OUTDIR)
             conda:
                 "../envs/signac.yaml"
             params:
+                dir_sample = lambda wildcards: expand("{outdir}/{{sample}}/", sample=condition_to_samples[wildcards.condition], outdir=OUTDIR),
+                sample_ID = lambda wildcards: condition_to_samples[wildcards.condition],
                 samples_tsv = config['samples'],
-                dir_sample=directory("{}/{{sample}}/").format(OUTDIR),
-                sample_ID="{{sample}}",
                 fc_resolution = config['signac']['mito']['clonotype_finding']['fc_resolution'],
                 fc_k = config['signac']['mito']['clonotype_finding']['fc_k']
             threads: get_resource("signac", "threads")
@@ -106,39 +106,39 @@ if config["signac"]["enable"]:
                 mem_mb=get_resource("signac", "mem_mb"),
                 walltime=get_resource("signac", "walltime")
             log:
-                err="{}/signac/{{sample}}_step3_signac.err".format(LOGDIR),
-                out="{}/signac/{{sample}}_step3_signac.out".format(LOGDIR)
+                err="{}/integration/{{condition}}_step3_signac.err".format(LOGDIR),
+                out="{}/integration/{{condition}}_step3_signac.out".format(LOGDIR)
             script:
                 "../scripts/step3_findclonotypes.R"
 
-        rule step4_signac:
-            input:
-                get_step3_output
-            output:
-                "{}/integration/SeuratObject_Merge.rds".format(OUTDIR)
-            conda:
-                "../envs/signac.yaml"
-            params:
-                cores = config['signac']['cores'],
-                harmony = config['signac']['harmony']['enable'],
-                lambdaHarmony = config['signac']['harmony']['lambda'],
-                GEX = config['signac']['GEX'],
-                RmCompo = config['signac']['clustering']['remove_first_component'],
-                NbDim = config['signac']['clustering']['dims'],
-                CutOff_FTF = config['signac']['clustering']['min.cutoff'],
-                MinDistUMAP = config['signac']['clustering']['min.dist'],
-                AlgoClustering = config['signac']['clustering']['algorithm'],
-                ResolutionClustering = config['signac']['clustering']['resolution'],
-                batch_corr = config['signac']['batch_correction']['enable'],
-                var_batch  = config['signac']['batch_correction']['variable_to_regress'],
-                nb_cores = config['signac']['cores']
-            threads: get_resource("signac", "threads")
-            resources:
-            log:
-                err=expand("{LOGDIR}/signac/step4_signac.err", LOGDIR = LOGDIR),
-                out=expand("{LOGDIR}/signac/step4_signac.out", LOGDIR = LOGDIR)
-            script:
-                "../scripts/step4_merge.R"
+        #rule step4_signac:
+        #    input:
+        #        get_step4_input
+        #    output:
+        #        "{}/integration/SeuratObject_Merge.rds".format(OUTDIR)
+        #    conda:
+        #        "../envs/signac.yaml"
+        #    params:
+        #        cores = config['signac']['cores'],
+        #        harmony = config['signac']['harmony']['enable'],
+        #        lambdaHarmony = config['signac']['harmony']['lambda'],
+        #        GEX = config['signac']['GEX'],
+        #        RmCompo = config['signac']['clustering']['remove_first_component'],
+        #        NbDim = config['signac']['clustering']['dims'],
+        #        CutOff_FTF = config['signac']['clustering']['min.cutoff'],
+        #        MinDistUMAP = config['signac']['clustering']['min.dist'],
+        #        AlgoClustering = config['signac']['clustering']['algorithm'],
+        #        ResolutionClustering = config['signac']['clustering']['resolution'],
+        #        batch_corr = config['signac']['batch_correction']['enable'],
+        #        var_batch  = config['signac']['batch_correction']['variable_to_regress'],
+        #        nb_cores = config['signac']['cores']
+        #    threads: get_resource("signac", "threads")
+        #    resources:
+        #    log:
+        #        err=expand("{LOGDIR}/signac/step4_signac.err", LOGDIR = LOGDIR),
+        #        out=expand("{LOGDIR}/signac/step4_signac.out", LOGDIR = LOGDIR)
+        #    script:
+        #        "../scripts/step4_merge.R"
 
 ### Triggers invidiual sample analysis ### 
     if config["signac"]["individual_analysis"]:
