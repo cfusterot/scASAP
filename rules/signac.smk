@@ -96,7 +96,7 @@ if config["signac"]["enable"]:
             conda:
                 "../envs/signac.yaml"
             params:
-                dir_sample = lambda wildcards: expand("{outdir}/{{sample}}/", sample=condition_to_samples[wildcards.condition], outdir=OUTDIR),
+                dir_sample = lambda wildcards: expand("{outdir}/{sample}/", sample=condition_to_samples[wildcards.condition], outdir=OUTDIR),
                 sample_ID = lambda wildcards: condition_to_samples[wildcards.condition],
                 samples_tsv = config['samples'],
                 fc_resolution = config['signac']['mito']['clonotype_finding']['fc_resolution'],

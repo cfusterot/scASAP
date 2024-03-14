@@ -33,3 +33,4 @@ dependencies:
     - r-remotes
     - r-sessioninfo
     - r-doparallel
+    - r-stringr
