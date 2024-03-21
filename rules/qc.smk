@@ -86,13 +86,13 @@ rule fastq_screen:
         "v1.23.4/bio/fastq_screen"
 
 def multiqc_input(wc):
-    f=expand("{OUTDIR}/{{sample}}/qc/fastqc/{prefix}_{name}_fastqc.zip", OUTDIR=OUTDIR, prefix = get_fastq_prefix(wc), name = get_fastq_name(wc)) 
-    try: 
-        if config["parameters"]["fastq_screen"]["enabled"]:
-            f +=expand("{OUTDIR}/{{sample}}/qc/fastq_screen/{prefix}.{name}.fastq_screen.txt", OUTDIR=OUTDIR, prefix=get_fastq_prefix, name=get_fastq_name)
+    file=expand("{OUTDIR}/{{sample}}/qc/fastqc/{prefix}_{name}_fastqc.zip", OUTDIR=OUTDIR, prefix = get_fastq_prefix(wc), name = get_fastq_name(wc)) 
+    try:
+        if config["fastq_screen"]["enabled"]:
+            file +=expand("{OUTDIR}/{{sample}}/qc/fastq_screen/{prefix}.{name}.fastq_screen.txt", OUTDIR=OUTDIR, prefix=get_fastq_prefix(wc), name=get_fastq_name(wc))
     except KeyError:
-        print("FASTQ_SCREEN disabled by config file. Skipping...")
-    return f
+         print("FASTQ SCREEN disabled by config file. Skipping...")
+    return file
 
 rule multiqc:
     input:

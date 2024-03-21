@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import warnings
 
 # -- Snakefile basic configuration -- #
 report: "report/workflow.rst"
@@ -73,6 +74,7 @@ def signac_output(wc):
         file = expand("{OUTDIR}/{sample}/signac/01_preprocessing_{sample}.html", sample=samples['sample'],OUTDIR=OUTDIR)
     else:
         file = []
+        warnings.warn("Signac analysis disabled. Skipping...", category=UserWarning)
     return file
 
 rule all:
