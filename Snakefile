@@ -56,7 +56,7 @@ def get_integration_amulet(wc):
 condition_to_samples = samples.groupby('condition')['sample'].apply(list).to_dict()
 
 def get_step4_input(wc):
-    file = expand("{OUTDIR}/integration/SeuratObjectBis_{condition}.rds", OUTDIR=OUTDIR, sample=samples['condition'])
+    file = expand("{OUTDIR}/integration/SeuratObjectBis_{condition}.rds", OUTDIR=OUTDIR, condition=samples['condition'])
     file = list(set(file))
     return file
 
@@ -68,9 +68,11 @@ def get_step4_input(wc):
 # -- Final output -- #
 def signac_output(wc):
     if config["signac"]["enable"]:
-        file = expand("{OUTDIR}/{sample}/signac/SeuratObject_{sample}.rds", sample=samples['sample'],OUTDIR=OUTDIR)    
-    if config["signac"]["individual_analysis"]:
+        file = expand("{OUTDIR}/integration/SeuratObjectBis_{condition}.rds", condition=samples['condition'],OUTDIR=OUTDIR)    
+    if config["signac"]["enable"] and config["signac"]["individual_analysis"]:
         file = expand("{OUTDIR}/{sample}/signac/01_preprocessing_{sample}.html", sample=samples['sample'],OUTDIR=OUTDIR)
+    else:
+        file = []
     return file
 
 rule all:
@@ -78,8 +80,7 @@ rule all:
         expand(["{OUTDIR}/{sample}/cellranger_count/cellranger.finish",
                 "{OUTDIR}/{sample}/qc/multiqc_report.html",
                 "{OUTDIR}/{sample}/mgatk/final/{sample}.rds",
-                "{OUTDIR}/{sample}/amulet/MultipletSummary.txt",
-                "{OUTDIR}/integration/SeuratObjectBis_{condition}.rds"],
+                "{OUTDIR}/{sample}/amulet/MultipletSummary.txt"],
         sample=samples['sample'], OUTDIR=OUTDIR, condition = samples['condition']),
         signac_output
 

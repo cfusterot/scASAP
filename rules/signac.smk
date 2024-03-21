@@ -111,36 +111,38 @@ if config["signac"]["enable"]:
             script:
                 "../scripts/step3_findclonotypes.R"
 
-        #rule step4_signac:
-        #    input:
-        #        get_step4_input
-        #    output:
-        #        "{}/integration/SeuratObject_Merge.rds".format(OUTDIR)
-        #    conda:
-        #        "../envs/signac.yaml"
-        #    params:
-        #        cores = config['signac']['cores'],
-        #        harmony = config['signac']['harmony']['enable'],
-        #        lambdaHarmony = config['signac']['harmony']['lambda'],
-        #        GEX = config['signac']['GEX'],
-        #        RmCompo = config['signac']['clustering']['remove_first_component'],
-        #        NbDim = config['signac']['clustering']['dims'],
-        #        CutOff_FTF = config['signac']['clustering']['min.cutoff'],
-        #        MinDistUMAP = config['signac']['clustering']['min.dist'],
-        #        AlgoClustering = config['signac']['clustering']['algorithm'],
-        #        ResolutionClustering = config['signac']['clustering']['resolution'],
-        #        batch_corr = config['signac']['batch_correction']['enable'],
-        #        var_batch  = config['signac']['batch_correction']['variable_to_regress'],
-        #        nb_cores = config['signac']['cores']
-        #    threads: get_resource("signac", "threads")
-        #    resources:
-        #    log:
-        #        err=expand("{LOGDIR}/signac/step4_signac.err", LOGDIR = LOGDIR),
-        #        out=expand("{LOGDIR}/signac/step4_signac.out", LOGDIR = LOGDIR)
-        #    script:
-        #        "../scripts/step4_merge.R"
-
-### Triggers invidiual sample analysis ### 
+        rule step4_signac:
+            input:
+                get_step4_input
+            output:
+                "{}/integration/SeuratObject_Merge.rds".format(OUTDIR)
+            conda:
+                "../envs/signac.yaml"
+            params:
+                dir_sample=directory("{}/integration/").format(OUTDIR),
+                cores = config['signac']['cores'],
+                harmony = config['signac']['harmony']['enable'],
+                lambdaHarmony = config['signac']['harmony']['lambda'],
+                GEX = config['signac']['GEX'],
+                RmCompo = config['signac']['clustering']['remove_first_component'],
+                NbDim = config['signac']['clustering']['dims'],
+                CutOff_FTF = config['signac']['clustering']['min.cutoff'],
+                MinDistUMAP = config['signac']['clustering']['min.dist'],
+                AlgoClustering = config['signac']['clustering']['algorithm'],
+                ResolutionClustering = config['signac']['clustering']['resolution'],
+                batch_corr = config['signac']['batch_correction']['enable'],
+                var_batch  = config['signac']['batch_correction']['variable_to_regress'],
+                nb_cores = config['signac']['cores']
+            threads: get_resource("signac", "threads")
+            resources:
+                 mem_mb=get_resource("signac", "mem_mb"),
+                 walltime=get_resource("signac", "walltime")
+            log:
+                err=expand("{LOGDIR}/signac/step4_signac.err", LOGDIR = LOGDIR),
+                out=expand("{LOGDIR}/signac/step4_signac.out", LOGDIR = LOGDIR)
+            script:
+                "../scripts/step4_merge.R"
+    
     if config["signac"]["individual_analysis"]:
         rule step1_preprocess:
             input:
