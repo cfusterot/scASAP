@@ -69,12 +69,14 @@ def get_step4_input(wc):
 # -- Final output -- #
 def signac_output(wc):
     if config["signac"]["enable"]:
-        file = expand("{OUTDIR}/integration/SeuratObjectBis_{condition}.rds", condition=samples['condition'],OUTDIR=OUTDIR)    
-    if config["signac"]["enable"] and config["signac"]["individual_analysis"]:
-        file = expand("{OUTDIR}/{sample}/signac/01_preprocessing_{sample}.html", sample=samples['sample'],OUTDIR=OUTDIR)
+        if config["signac"]["integrate_samples"]:
+            file = expand("{OUTDIR}/integration/SeuratObjectBis_{condition}.rds", condition=samples['condition'],OUTDIR=OUTDIR)
+        if config["signac"]["individual_analysis"]:
+            file += expand("{OUTDIR}/{sample}/signac/01_preprocessing_{sample}.html", sample=samples['sample'],OUTDIR=OUTDIR)
     else:
         file = []
         warnings.warn("Signac analysis disabled. Skipping...", category=UserWarning)
+    file = list(set(file))
     return file
 
 rule all:
@@ -82,13 +84,13 @@ rule all:
         expand(["{OUTDIR}/{sample}/cellranger_count/cellranger.finish",
                 "{OUTDIR}/{sample}/qc/multiqc_report.html",
                 "{OUTDIR}/{sample}/mgatk/final/{sample}.rds",
-                "{OUTDIR}/{sample}/amulet/MultipletSummary.txt"],
-        sample=samples['sample'], OUTDIR=OUTDIR, condition = samples['condition']),
+                "{OUTDIR}/{sample}/amulet/MultipletSummary.txt"], 
+                sample=samples['sample'], OUTDIR=OUTDIR, condition = samples['condition']),
         signac_output
 
 # -- Rule files -- #
-include: "rules/cellranger.smk"
 include: "rules/qc.smk"
+include: "rules/cellranger.smk"
 include: "rules/mgatk.smk"
 include: "rules/amulet.smk"
 include: "rules/signac.smk"
