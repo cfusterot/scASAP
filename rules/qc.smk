@@ -40,7 +40,7 @@ rule fastqc:
     threads: 
         threads=get_resource("fastqc", "threads")
     wrapper:
-        "v1.23.1/bio/fastqc"
+        "v3.5.3/bio/fastqc"
 
 rule fastq_screen_indexes:
     output:
@@ -83,7 +83,7 @@ rule fastq_screen:
         subset=100000,
         aligner='bowtie2'
     wrapper:
-        "v1.23.4/bio/fastq_screen"
+        "v3.5.3/bio/fastq_screen"
 
 def multiqc_input(wc):
     file=expand("{OUTDIR}/{{sample}}/qc/fastqc/{prefix}_{name}_fastqc.zip", OUTDIR=OUTDIR, prefix = get_fastq_prefix(wc), name = get_fastq_name(wc)) 
