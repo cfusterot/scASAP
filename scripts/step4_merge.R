@@ -1,4 +1,4 @@
-RmCompo#################################################################
+#################################################################
 #                                                               #
 #                           STEP 4:                             #
 #                       Merge samples                           #
@@ -23,12 +23,19 @@ source("scripts/signac_common.R")
 
 # -------- Read parameters from config.yaml -------- #
 dir.output = ""
+print(dir.output)
 name.grp = "sample"
+print(name.grp)
 GEX = snakemake@params[['GEX']]
+print(GEX)
 harmony = snakemake@params[['harmony']]
+print(harmony)
 CutOff_FTF = snakemake@params[['CutOff_FTF']]
+print(CutOff_FTF)
 NbDim = snakemake@params[['NbDim']]
+print(NbDim)
 RmCompo =snakemake@params[['RmCompo']]
+print(RmCompo)
 MinDistUMAP = snakemake@params[['MinDistUMAP']]
 var.batch = snakemake@params[['var.batch']]
 lambdaHarmony = snakemake@params[['lambdaHarmony']]

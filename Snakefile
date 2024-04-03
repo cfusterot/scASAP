@@ -71,6 +71,7 @@ def signac_output(wc):
     if config["signac"]["enable"]:
         if config["signac"]["integrate_samples"]:
             file = expand("{OUTDIR}/integration/SeuratObjectBis_{condition}.rds", condition=samples['condition'],OUTDIR=OUTDIR)
+            file += expand("{OUTDIR}/integration/SeuratObject_Merge.rds", OUTDIR = OUTDIR)
         if config["signac"]["individual_analysis"]:
             file += expand("{OUTDIR}/{sample}/signac/01_preprocessing_{sample}.html", sample=samples['sample'],OUTDIR=OUTDIR)
     else:
