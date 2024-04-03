@@ -59,7 +59,7 @@ CreateATACobject = function(sample.ID, dir.data.sample, MinCounts, dir.output, g
   # Create chromatin assay
   chrom = CreateChromatinAssay(counts, fragments = frag)              
   # Create Seurat objects
-  chrom = CreateSeuratObject(chrom, assay = "peaks", meta.data = meta)
+  chrom = CreateSeuratObject(chrom, assay = "peaks", meta.data = meta, project = sample.ID)
   chrom = AddMetaData(chrom, metadata = sample.ID, col.name = name.ID)
   # Remove doublets
   doublets = read.table(paste0(dir.data.sample, "/amulet/MultipletBarcodes_01.txt"))$V1

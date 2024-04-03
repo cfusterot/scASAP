@@ -39,6 +39,5 @@ print(samples_ID)
 
 # -------- Run functions -------- #
 message("Generating common set of peaks for all samples:")
-FindCommonPeaks_scATACseq(MaxPeakWidth = max_peak_width, MinPeakWidth = min_peak_width,
-    dir.output = dir_output, dir.data.samples = outs)
+FindCommonPeaks_scATACseq(MaxPeakWidth = max_peak_width, MinPeakWidth = min_peak_width, dir.output = dir_output, dir.data.samples = outs)
 

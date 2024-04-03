@@ -22,7 +22,7 @@ message("Loading analysis functions")
 source("scripts/signac_common.R")
 
 # -------- Read parameters from config.yaml -------- #
-dir.output = ""
+dir.output = snakemake@params[['dir_sample']]
 print(dir.output)
 name.grp = "sample"
 print(name.grp)

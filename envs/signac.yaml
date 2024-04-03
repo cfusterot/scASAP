@@ -7,7 +7,7 @@ dependencies:
     - numpy
     - libgfortran
     - r-spatstat
-    - r-base=4.2
+    - r-base
     - bioconductor-biostrings
     - bioconductor-biovizbase
     - bioconductor-ensdb.hsapiens.v86 #bioconductor-ensdb.mmusculus.v79
@@ -21,7 +21,7 @@ dependencies:
     - r-dplyr
     - r-foreach
     - r-ggplot2
-    - r-signac
+    - r-signac=1.12.0
     - r-seurat                                                   
     - r-data.table
     - r-irlba
