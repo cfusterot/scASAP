@@ -82,17 +82,18 @@ def signac_output(wc):
 
 rule all:
     input:
-        expand(["{OUTDIR}/{sample}/cellranger_count/cellranger.finish" #,
-               # "{OUTDIR}/{sample}/qc/multiqc_report.html",
-               # "{OUTDIR}/{sample}/mgatk/final/{sample}.rds",
-               # "{OUTDIR}/{sample}/amulet/MultipletSummary.txt"
+        expand(["{OUTDIR}/{sample}/qc/multiqc_report.html",
+                "{OUTDIR}/{sample}/cellranger_count/cellranger.finish",
+                "{OUTDIR}/{sample}/cellranger_count/mgatkdel_find.clip.tsv",
+                "{OUTDIR}/{sample}/mgatk/final/{sample}.rds",
+                "{OUTDIR}/{sample}/amulet/MultipletSummary.txt"
                ], sample=samples['sample'], OUTDIR=OUTDIR, condition = samples['condition']),
         signac_output
 
 # -- Rule files -- #
-#include: "rules/qc.smk"
+include: "rules/qc.smk"
 include: "rules/cellranger.smk"
-#include: "rules/mgatk.smk"
-#include: "rules/amulet.smk"
+include: "rules/mgatk.smk"
+include: "rules/amulet.smk"
 include: "rules/signac.smk"
 include: "rules/other.smk"

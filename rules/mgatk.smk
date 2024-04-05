@@ -6,7 +6,7 @@ rule mgatk:
     params:
         bam="{}/{{sample}}/cellranger_count/possorted_bam.bam".format(OUTDIR)
     output:
-        ref="{}/{{sample}}/mgatk/final/{{sample}}.rds".format(OUTDIR)
+        "{}/{{sample}}/mgatk/final/{{sample}}.rds".format(OUTDIR)
     conda:
         "../envs/mgatk.yaml"
     threads: get_resource("mgatk", "threads")
@@ -29,4 +29,25 @@ rule mgatk:
         cd {OUTDIR}/{wildcards.sample}
         # run mgatk command
         mgatk tenx -i {params.bam} -n {wildcards.sample} -o {OUTDIR}/{wildcards.sample}/mgatk/ -bt CB -b {OUTDIR}/{wildcards.sample}/cellranger_count/filtered_peak_bc_matrix/barcodes.tsv 
+        """
+
+rule mgatkdel_find:
+    input:
+       finish="{}/{{sample}}/cellranger_count/cellranger.finish".format(OUTDIR)
+    params:
+       bam="{}/{{sample}}/cellranger_count/possorted_bam.bam".format(OUTDIR)
+    output:
+       "{}/{{sample}}/cellranger_count/mgatkdel_find.clip.tsv".format(OUTDIR)
+    conda:
+        "../envs/mgatk.yaml"
+    threads: get_resource("mgatk", "threads")
+    resources:
+        mem_mb=get_resource("mgatk", "mem_mb"),
+        walltime=get_resource("mgatk", "walltime")
+    log:
+        err="{}/{{sample}}/mgatk_del.err".format(LOGDIR),
+        out="{}/{{sample}}/mgatk_del.out".format(LOGDIR)
+    shell:
+        """
+        mgatk-del-find -i {params.bam}
         """

@@ -110,4 +110,4 @@ rule multiqc:
         mem_mb=get_resource("multiqc","mem_mb"),
         walltime=get_resource("multiqc","walltime")
     wrapper:
-        "v3.5.3/bio/multiqc"
+        "v3.7.0/bio/multiqc"
