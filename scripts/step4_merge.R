@@ -24,7 +24,7 @@ source("scripts/signac_common.R")
 # -------- Read parameters from config.yaml -------- #
 dir.output = snakemake@params[['dir_sample']]
 print(dir.output)
-name.grp = "sample"
+name.grp = "orig.ident"
 print(name.grp)
 GEX = snakemake@params[['GEX']]
 print(GEX)
@@ -37,11 +37,17 @@ print(NbDim)
 RmCompo =snakemake@params[['RmCompo']]
 print(RmCompo)
 MinDistUMAP = snakemake@params[['MinDistUMAP']]
+print(MinDistUMAP)
 var.batch = snakemake@params[['var.batch']]
+print(var.batch)
 lambdaHarmony = snakemake@params[['lambdaHarmony']]
+print(lambdaHarmony)
 AlgoClustering = snakemake@params[['AlgoClustering']]
+print(AlgoClustering)
 ResolutionClustering = snakemake@params[['ResolutionClustering']]
+print(ResolutionClustering)
 batch_corr = snakemake@params[['batch_corr']]
+print(batch_corr)
 
 # -------- Read files, set variables -------- #
 samples = read.table("config/samples.tsv", header = T)
@@ -52,14 +58,13 @@ col.palette = c("#333399", "#6666CC", "#9999FF", "#CCCCFF", "#e3b3e3", "#b37bb3"
 files.seurat = list.files(dir.output)
 
 if(!"SeuratObject_Merge.rds" %in% files.seurat){ #in case the merge has been done already
-  seurat.list = sapply(unique(samples$condition), function(x) readRDS(paste0(dir.output, "/SeuratObjectBis_", x, ".rds")))
-  names(seurat.list) = unique(samples$condition)
-  seurat = merge(
-    x = seurat.list[[1]],
-    y = seurat.list[-1]
-  )
+  seurat.list = setNames(sapply(unique(samples$condition), function(x) readRDS(paste0(dir.output, "/SeuratObjectBis_", x, ".rds"))), unique(samples$condition))
+  
+  print("Merging seurat objects")
+  seurat = merge(x = seurat.list[[1]], y = seurat.list[-1])
   
   if(GEX){
+    print("Computing GEX")
     DefaultAssay(seurat) = "peaks"
     # Compute gene accessibility
     gene.activities = GeneActivity(seurat)
@@ -85,9 +90,7 @@ if(!"SeuratObject_Merge.rds" %in% files.seurat){ #in case the merge has been don
 if(harmony){
   message("Running harmony to correct batch effect")
   seurat@meta.data[[var.batch]] = as.factor(seurat@meta.data[[var.batch]])
-  seurat = RunHarmony(object = seurat, group.by.vars = "Sample", 
-                          reduction = 'lsi', assay.use = 'peaks', project.dim = FALSE, lambda = lambdaHarmony)
-  reduction= "harmony"
+  seurat = RunHarmony(object = seurat, group.by.vars = var.batch, reduction.use = 'lsi', assay.use = 'peaks', project.dim = FALSE, lambda = lambdaHarmony)
 } else {
   message("Setting lsi reduction")
   reduction = "lsi"

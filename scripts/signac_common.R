@@ -208,7 +208,7 @@ SignacWorkflow = function(seurat, dir.output, name.grp, harmony, CutOff_FTF, NbD
     seurat = FindTopFeatures(seurat, min.cutoff = CutOff_FTF)
     seurat = RunSVD(seurat)
     
-    pdf(paste0(dir.output, "/Plots/DepthCor.pdf"), width = 6, height = 4)
+    pdf(paste0(dir.output, "/plots/DepthCor.pdf"), width = 6, height = 4)
     print(DepthCor(seurat) + theme(text = element_text(colour = "black", size = 15), 
                                    axis.line = element_line(color = "black", size = 0.8),
                                    axis.text.x = element_text(colour = "black", size = 15),
@@ -226,8 +226,11 @@ SignacWorkflow = function(seurat, dir.output, name.grp, harmony, CutOff_FTF, NbD
   
   seurat = RunUMAP(seurat, dims = Dim, reduction = Reduction, min.dist = MinDistUMAP)
   
-  pdf(paste0(dir.output, "/Plots/UMAP_Merge_Condition_", Reduction, ".pdf"), width = 6, height = 4)
+  pdf(paste0(dir.output, "/plots/UMAP_Merge_Condition_", Reduction, ".pdf"), width = 6, height = 4)
+  print("Generating Dimplot for...")
+  print(name.grp)
   sapply(name.grp, function(x){
+    print(paste0("Variable: ", x))
     print(DimPlot(seurat, group.by = x, pt.size = 0.001, shuffle = T, cols = col.palette) + 
             theme(text = element_text(colour = "black", size = 15), 
                   axis.line = element_line(color = "black", size = 0.8),
@@ -240,7 +243,7 @@ SignacWorkflow = function(seurat, dir.output, name.grp, harmony, CutOff_FTF, NbD
   seurat = FindNeighbors(object = seurat, reduction = Reduction, dims = Dim)
   seurat = FindClusters(object = seurat, verbose = FALSE, algorithm = AlgoClustering, resolution = ResolutionClustering)
   
-  pdf(paste0(dir.output, "/Plots/UMAP_Merge_Clusters_", Reduction, ".pdf"), width = 6, height = 4)
+  pdf(paste0(dir.output, "/plots/UMAP_Merge_Clusters_", Reduction, ".pdf"), width = 6, height = 4)
   print(DimPlot(seurat, group.by = "seurat_clusters", pt.size = 0.001, shuffle = T, cols = col.palette) + 
             theme(text = element_text(colour = "black", size = 15), 
                   axis.line = element_line(color = "black", size = 0.8),
