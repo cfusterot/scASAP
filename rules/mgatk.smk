@@ -18,8 +18,6 @@ rule mgatk:
         out="{}/{{sample}}/mgatk.out".format(LOGDIR)
     shell:
         """
-        # delete folder if exists
-        rm -f -R {OUTDIR}/{wildcards.sample}/mgatk
         # common error resolved by those two export commands
         export LC_ALL=C.UTF-8
         export LANG=C.UTF-8
@@ -37,7 +35,7 @@ rule mgatkdel_find:
     params:
        bam="{}/{{sample}}/cellranger_count/possorted_bam.bam".format(OUTDIR)
     output:
-       "{}/{{sample}}/cellranger_count/mgatkdel_find.clip.tsv".format(OUTDIR)
+       "{}/{{sample}}/mgatk/del/mgatkdel_find.clip.tsv".format(OUTDIR)
     conda:
         "../envs/mgatk.yaml"
     threads: get_resource("mgatk", "threads")
@@ -49,5 +47,9 @@ rule mgatkdel_find:
         out="{}/{{sample}}/mgatk_del.out".format(LOGDIR)
     shell:
         """
+        #delete folder if exists
+        rm -f -R {OUTDIR}/{wildcards.sample}/mgatk/del
+        mkdir {OUTDIR}/{wildcards.sample}/mgatk/del
+        cd {OUTDIR}/{wildcards.sample}/mgatk/del
         mgatk-del-find -i {params.bam}
         """

@@ -84,7 +84,7 @@ rule all:
     input:
         expand(["{OUTDIR}/{sample}/qc/multiqc_report.html",
                 "{OUTDIR}/{sample}/cellranger_count/cellranger.finish",
-                "{OUTDIR}/{sample}/cellranger_count/mgatkdel_find.clip.tsv",
+                "{OUTDIR}/{sample}/mgatk/del/mgatkdel_find.clip.tsv",
                 "{OUTDIR}/{sample}/mgatk/final/{sample}.rds",
                 "{OUTDIR}/{sample}/amulet/MultipletSummary.txt"
                ], sample=samples['sample'], OUTDIR=OUTDIR, condition = samples['condition']),

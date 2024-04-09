@@ -6,6 +6,8 @@ dependencies:
   - r-base
   - r-matrix
   - r-data.table
+  - r-ggrepel
+  - r-dplyr
   - bioconductor-summarizedexperiment
   - bioconductor-genomicranges
   - ruamel.yaml=0.17.21
