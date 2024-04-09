@@ -31,6 +31,8 @@ amulet:
 
 # --- d. (optional) Mitochondrial variant identification --- #
 mgatk:
+   enable: TRUE
+mgatk-del-find:
    enable: TRUE 
 # --- e. (optional) Signac --- #
 signac:
