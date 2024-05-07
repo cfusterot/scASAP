@@ -1,0 +1,28 @@
+name: cnv
+channels:
+    - conda-forge
+    - bioconda
+dependencies:
+    - r-devtools
+    - r-data.table
+    - r-mgcv
+    - r-ggdendro
+    - r-cowplot
+    - r-ggplot2
+    - r-magrittr
+    - r-matrix
+    - r-gridextra
+    - r-tidyselect
+    - bioconductor-plyranges
+    - bioconductor-biocparallel
+    - bioconductor-summarizedexperiment
+    - bioconductor-genomicalignments
+    - bioconductor-plyranges
+    - bioconductor-rsamtools
+    - bioconductor-genomeinfodb
+    - bioconductor-bsgenome.hsapiens.ucsc.hg38
+    - bioconductor-genomicranges
+    - bioconductor-biostrings
+    - bioconductor-biocgenerics
+    - bioconductor-s4vectors
+    - bioconductor-genomicfeatures
