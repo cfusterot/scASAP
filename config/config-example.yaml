@@ -79,7 +79,11 @@ signac:
     variable_to_regress: "sample"
   cores: 4
 
-# --- f. (optional) Genotyping with gotcha --- #
+# --- f. CNV analysis with Epianeufinder --- # 
+cnv:
+  enable: TRUE
+
+# --- g. (optional) Genotyping with gotcha --- #
 gotcha:
   enable: False
   whitelist: "/data/gpfs-1/users/cofu10_c/work/references/barcodes/737K-cratac-v1.txt"
@@ -97,30 +101,34 @@ gotcha:
 # -- Cluster resources configuration -- #
 resources:
     default:
-        threads: 1
-        mem_mb: 8000
-        walltime: 480
+      threads: 1
+      mem_mb: 8000
+      walltime: 480
     fastqc:
       threads: 4
       mem_mb: 32000
     fastq_screen:
       threads: 8
     cellranger:
-        threads: 4
-        mem_mb: 120000
-        walltime: 4320
+      threads: 4
+      mem_mb: 120000
+      walltime: 4320
     mgatk:
-        threads: 4
-        mem_mb: 64000
-        walltime: 1140
+      threads: 4
+      mem_mb: 64000
+      walltime: 1140
     amulet:
-        threads: 4
-        mem_mb: 64000
-        walltime: 1140
+      threads: 4
+      mem_mb: 64000
+      walltime: 1140
     signac:
-        threads: 2
-        mem_mb: 64000
-        walltime: 1140
+      threads: 2
+      mem_mb: 64000
+      walltime: 1140
+    cnv:
+      threads: 4
+      mem_mb: 64000
+      walltime: 1140
     gotcha:
-        threads: 4
-        mem_mb: 80000
+      threads: 4
+      mem_mb: 80000
