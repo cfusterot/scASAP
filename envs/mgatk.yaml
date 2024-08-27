@@ -14,8 +14,10 @@ dependencies:
   - java-jdk
   - python=3.8
   - pulp=2.7
+  - snakemake
   - pip
   - pip:
+    - numpy
     - encoding-tools
     - click
     - dataclasses

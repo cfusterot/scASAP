@@ -5,9 +5,9 @@ channels:
 dependencies:
   - java-jdk
   - python=3.7
+  - numpy
   - pip
   - pip:
     - statsmodels
     - pandas
     - scipy
-    - numpy

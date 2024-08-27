@@ -82,7 +82,7 @@ def signac_output(wc):
 
 rule all:
     input:
-        expand(["{OUTDIR}/{sample}/qc/multiqc_report.html",
+        expand([ #"{OUTDIR}/{sample}/qc/multiqc_report.html",
                 "{OUTDIR}/{sample}/cellranger_count/cellranger.finish",
                 "{OUTDIR}/{sample}/mgatk/del/mgatkdel_find.clip.tsv",
                 "{OUTDIR}/{sample}/mgatk/final/{sample}.rds",
@@ -91,7 +91,7 @@ rule all:
         signac_output
 
 # -- Rule files -- #
-include: "rules/qc.smk"
+#include: "rules/qc.smk"
 include: "rules/cellranger.smk"
 include: "rules/mgatk.smk"
 include: "rules/amulet.smk"

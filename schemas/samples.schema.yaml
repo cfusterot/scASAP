@@ -17,5 +17,4 @@ properties:
 # columns that the config/samples.tsv file must have to pass schema validation
 required:
   - sample
-  - alias
   - condition
